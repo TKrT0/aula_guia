@@ -42,3 +42,9 @@ __pycache__/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# python - backend
+backend/.venv/
+backend/data/
+backend/main.py
+backend/parser.py
