@@ -1,21 +1,69 @@
 'use client';
+import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Navbar from "@/src/components/layout/Navbar";
+import { buscarProfesoresYMaterias } from '@/src/lib/supabaseQueries';
+import ProfessorCard from '@/src/components/search/ProfessorCard';
+import EmptyState from '@/src/components/ui/EmptyState';
 
 export default function BuscarPage() {
   const searchParams = useSearchParams();
-  const query = searchParams.get('q'); 
+  const query = searchParams.get('q') || '';
+  const [resultados, setResultados] = useState<any[]>([]);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    async function obtenerDatos() {
+      setCargando(true);
+      const data = await buscarProfesoresYMaterias(query);
+      setResultados(data);
+      setCargando(false);
+    }
+    
+    if (query) {
+      obtenerDatos();
+    }
+  }, [query]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-background-dark">
       <Navbar />
-      <main className="max-w-[1280px] mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold text-primary dark:text-white">
-          Resultados para: <span className="text-accent">{query}</span>
-        </h1>
-        <p className="mt-4 text-slate-500">
-          Próximamente: Aquí irá la ficha detallada y las estadísticas.
-        </p>
+      
+      <main className="max-w-[1400px] mx-auto px-6 py-12">
+        {/* Encabezado de resultados */}
+        <div className="mb-10">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
+            Resultados para: <span className="text-primary italic">"{query}"</span>
+          </h1>
+          <p className="text-slate-500 mt-1">
+            {cargando ? 'Buscando...' : `Se encontraron ${resultados.length} coincidencias`}
+          </p>
+        </div>
+        {/* Grid de Tarjetas  */}
+        {cargando ? (
+          <div className="text-center py-20">
+            <p className="text-slate-400 text-lg">Buscando...</p>
+          </div>
+        ) : resultados.length === 0 ? (
+          <div className="text-center py-20">
+            <EmptyState termino={query} />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {resultados.map((item, index) => (
+              <ProfessorCard
+                key={item.materia_id || index}
+                id={item.profesor_id}
+                nombre={item.profesor_nombre || "Sin nombre"}
+                facultad={`Materia: ${item.materia_nombre}`}
+                rating={item.rating_promedio}
+                dificultad={item.dificultad_promedio}
+                recomendacion={0}
+              />
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
