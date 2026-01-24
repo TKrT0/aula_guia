@@ -23,8 +23,6 @@ export const obtenerSugerencias = async (termino: string) => {
   if (!termino || termino.length < 2) return [];
 
   const supabase = createClient();
-  
-  console.log("🔍 Buscando sugerencias para:", termino); // CHIVATO 1
 
   const { data, error } = await supabase
     .from('vista_buscador')
@@ -33,10 +31,9 @@ export const obtenerSugerencias = async (termino: string) => {
     .limit(5);
 
   if (error) {
-    console.error("Error obteniendo sugerencias:", error.message); // CHIVATO 2
+    console.error("Error obteniendo sugerencias:", error.message);
     return [];
   }
 
-  console.log("Sugerencias encontradas:", data?.length); // CHIVATO 3
   return data || [];
 };

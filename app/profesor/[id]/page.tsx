@@ -1,7 +1,7 @@
 import { getProfessorProfile } from '@/src/lib/services/professorService';
-import ReviewCard from '@/src/components/profesor/ReviewCard';
+import ReviewsList from '@/src/components/profesor/ReviewsList';
+import CalificarButton from '@/src/components/profesor/CalificarButton';
 import Navbar from '@/src/components/layout/Navbar';
-import Link from 'next/link';
 import BackButton from '@/src/components/ui/BackButton';
 
 // Esta función es especial de Next.js para páginas dinámicas (Server Components)
@@ -49,23 +49,12 @@ if (!perfil) {
                   {perfil.metodo || "Método Mixto"}
                 </span>
               </div>
+              <div className="mt-4">
+                <CalificarButton profesorId={id} profesorNombre={perfil.nombre} />
+              </div>
             </div>
 
             {/* Estadísticas */}
-            <div className="flex gap-6 text-center">
-              <div>
-                <p className="text-3xl font-black text-slate-800">{stats.rating}</p>
-                <p className="text-xs text-slate-400 uppercase font-bold">Calificación</p>
-              </div>
-              <div className="w-px bg-slate-200 h-12"></div>
-              <div>
-                <p className="text-3xl font-black text-slate-800">{stats.dificultad}</p>
-                <p className="text-xs text-slate-400 uppercase font-bold">Dificultad</p>
-              </div>
-            </div>
-
-            {/* --- ESTADÍSTICAS DEL BACKEND --- */}
-            {/* Aquí es donde brilla tu nueva función */}
             <div className="flex gap-6 text-center">
               <div>
                 <p className="text-3xl font-black text-slate-800">{stats.rating}</p>
@@ -88,11 +77,7 @@ if (!perfil) {
 
           {/* LÓGICA DE RENDERIZADO */}
           {perfil.resenas && perfil.resenas.length > 0 ? (
-            <div className="space-y-4">
-              {perfil.resenas.map((resena: any, index: number) => (
-                <ReviewCard key={index} resena={resena} />
-              ))}
-            </div>
+            <ReviewsList resenas={perfil.resenas} />
           ) : (
             <div className="p-10 text-center bg-white rounded-2xl border border-dashed border-slate-300">
               <p className="text-slate-400 mb-2">Este profesor aún no tiene reseñas.</p>

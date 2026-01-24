@@ -41,7 +41,7 @@ export default function SearchBar({ onSearch, initialValue = '' }: SearchBarProp
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [wrapperRef]);
+  }, []); // wrapperRef es estable, no necesita estar en dependencias
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
