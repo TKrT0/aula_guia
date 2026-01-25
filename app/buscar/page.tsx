@@ -57,9 +57,10 @@ export default function BuscarPage() {
                 id={item.profesor_id}
                 nombre={item.profesor_nombre || "Sin nombre"}
                 facultad={`Materia: ${item.materia_nombre}`}
-                rating={item.rating_promedio}
-                dificultad={item.dificultad_promedio}
-                recomendacion={0}
+                rating={item.rating_promedio ?? null}
+                dificultad={item.dificultad_promedio ?? null}
+                recomendacion={item.recomendacion_pct ?? null}
+                nrc={item.nrc ?? null}
               />
             ))}
           </div>

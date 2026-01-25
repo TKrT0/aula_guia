@@ -21,13 +21,14 @@ export default function EmptyState({ termino }: EmptyStateProps) {
         Tal vez la materia está escrita diferente o el profesor aún no ha sido registrado.
       </p>
 
-      {/* Llamada a la acción (CTA) */}
+      {/* Llamada a la acción (CTA) - Próximamente */}
+      {/* 
       <div className="flex gap-4 justify-center">
-        {/* Este botón servirá en el futuro para agregar datos */}
         <button className="px-4 py-2 bg-primary text-white rounded-xl shadow-md hover:shadow-lg hover:bg-primary/90 transition-all text-sm font-bold">
           + Agregar materia nueva
         </button>
       </div>
+      */}
     </div>
   );
 }

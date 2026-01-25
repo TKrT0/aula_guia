@@ -11,7 +11,6 @@ export const buscarProfesoresYMaterias = async (termino: string) => {
     .limit(20);
 
   if (error) {
-    console.error("Error en Búsqueda Principal:", error.message);
     return [];
   }
   return data;
@@ -31,7 +30,6 @@ export const obtenerSugerencias = async (termino: string) => {
     .limit(5);
 
   if (error) {
-    console.error("Error obteniendo sugerencias:", error.message);
     return [];
   }
 

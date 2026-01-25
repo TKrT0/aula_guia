@@ -91,7 +91,6 @@ export const submitReview = async (profesorId: string, reviewData: ReviewData) =
     });
 
   if (error) {
-    console.error('Error al insertar reseña:', error.message);
     return { success: false, error: error.message };
   }
 
@@ -108,7 +107,6 @@ export const getMateriasByProfesor = async (profesorId: string) => {
     .eq('profesor_id', profesorId);
 
   if (error) {
-    console.error('Error obteniendo materias:', error.message);
     return [];
   }
 
