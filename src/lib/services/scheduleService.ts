@@ -316,21 +316,53 @@ export async function deleteSchedule(horarioId: string): Promise<{ success: bool
   return { success: true }
 }
 
-// Buscar materias disponibles para agregar (usa vista_buscador)
-export async function searchMateriasForSchedule(termino: string) {
+// Buscar materias disponibles para agregar (usa vista_buscador) - Con filtro de carrera
+// Ahora incluye los bloques de horario de cada materia
+export async function searchMateriasForSchedule(termino: string, carreraId?: string | null) {
   const supabase = createClient()
   
-  const { data, error } = await supabase
+  let query = supabase
     .from('vista_buscador')
     .select('*')
     .or(`materia_nombre.ilike.%${termino}%,profesor_nombre.ilike.%${termino}%,nrc.ilike.%${termino}%`)
-    .limit(20)
+  
+  // Filtrar por carrera si está seleccionada
+  if (carreraId) {
+    query = query.eq('carrera_id', carreraId)
+  }
+  
+  const { data, error } = await query.limit(30)
 
   if (error) {
     return []
   }
 
-  return data || []
+  if (!data || data.length === 0) {
+    return []
+  }
+
+  // Obtener los bloques de horario para cada materia
+  const nrcs = data.map((m: { nrc: string }) => m.nrc)
+  
+  const { data: bloques } = await supabase
+    .from('horarios_materia')
+    .select('*')
+    .in('nrc', nrcs)
+  
+  // Mapear bloques a cada materia
+  const bloquesMap = new Map<string, MateriaHorario[]>()
+  bloques?.forEach((bloque: MateriaHorario) => {
+    if (!bloquesMap.has(bloque.nrc || '')) {
+      bloquesMap.set(bloque.nrc || '', [])
+    }
+    bloquesMap.get(bloque.nrc || '')!.push(bloque)
+  })
+
+  // Agregar bloques a cada materia
+  return data.map((materia: { nrc: string }) => ({
+    ...materia,
+    bloques: bloquesMap.get(materia.nrc) || []
+  }))
 }
 
 // Obtener bloques de horario para una materia (por nrc)

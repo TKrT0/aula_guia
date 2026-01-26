@@ -3,6 +3,7 @@
 import React from 'react';
 import Navbar from '../layout/Navbar'; 
 import SearchBar from '../search/SearchBar'; 
+import CarreraSelector from '../ui/CarreraSelector';
 import { useRouter } from 'next/navigation';
 
 export default function Hero() {
@@ -16,7 +17,7 @@ export default function Hero() {
   return (
     <section className="relative w-full flex flex-col items-center pt-16 pb-20 px-4 sm:px-10 bg-gradient-to-b from-slate-50 to-white dark:from-background-dark dark:to-background-dark">
       
-      {/* 1. DECORACIÓN DE FONDO (La dejamos igual, se ve genial) */}
+      {/* 1. DECORACIÓN DE FONDO */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none opacity-40">
         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-cyan-100/50 blur-[100px]"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-blue-100/50 blur-[100px]"></div>
@@ -35,9 +36,13 @@ export default function Hero() {
           </h2>
         </div>
 
-        {/* 3. AQUÍ ESTÁ EL CAMBIO MAGISTRAL */}
-        {/* Quitamos todo el <form> manual y ponemos tu SearchBar inteligente */}
-        <div className="w-full max-w-[640px] mt-4 z-50">
+        {/* 3. SELECTOR DE CARRERA - Nuevo */}
+        <div className="w-full flex justify-center">
+          <CarreraSelector showLabel={true} />
+        </div>
+
+        {/* 4. BARRA DE BÚSQUEDA */}
+        <div className="w-full max-w-[640px] z-50">
           <SearchBar onSearch={manejarBusqueda} />
         </div>
 

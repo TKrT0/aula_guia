@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { obtenerSugerencias } from '@/src/lib/supabaseQueries';
+import { useCarrera } from '@/src/contexts/CarreraContext';
 
 interface SearchBarProps {
   onSearch: (term: string) => void;
@@ -15,12 +16,13 @@ export default function SearchBar({ onSearch, initialValue = '' }: SearchBarProp
   const [showSuggestions, setShowSuggestions] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { carreraId } = useCarrera();
 
-  // Mantenemos la lógica inteligente (debounce)
+  // Mantenemos la lógica inteligente (debounce) - ahora con filtro de carrera
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (term.trim().length >= 2) {
-        const results = await obtenerSugerencias(term);
+        const results = await obtenerSugerencias(term, carreraId);
         setSugerencias(results || []);
         setShowSuggestions(true);
       } else {
@@ -28,9 +30,9 @@ export default function SearchBar({ onSearch, initialValue = '' }: SearchBarProp
         setShowSuggestions(false);
       }
     };
-    const timeoutId = setTimeout(fetchSuggestions, 300); // Espera 300ms antes de buscar
+    const timeoutId = setTimeout(fetchSuggestions, 300);
     return () => clearTimeout(timeoutId);
-  }, [term]);
+  }, [term, carreraId]);
 
   // Cerrar al hacer clic fuera
   useEffect(() => {

@@ -46,7 +46,7 @@ export default function HorarioPage() {
     
     initAuth()
 
-    // Escuchar cambios de auth (esto detectará el login automáticamente)
+    // Escuchar cambios de auth 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
       setUser(session?.user ?? null)
       setLoading(false)

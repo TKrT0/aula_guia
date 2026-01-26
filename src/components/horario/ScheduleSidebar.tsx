@@ -2,6 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { searchMateriasForSchedule } from '@/src/lib/services/scheduleService'
+import { useCarrera } from '@/src/contexts/CarreraContext'
+import CarreraSelector from '@/src/components/ui/CarreraSelector'
+
+
 
 interface MateriaResult {
   materia_id: string
@@ -11,6 +15,7 @@ interface MateriaResult {
   nrc: string
   rating_promedio?: number
   creditos?: number
+
 }
 
 interface ScheduleSidebarProps {
@@ -22,32 +27,46 @@ export default function ScheduleSidebar({ onAddMateria, addedNRCs }: ScheduleSid
   const [searchTerm, setSearchTerm] = useState('')
   const [results, setResults] = useState<MateriaResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const { carreraId, carreraNombre } = useCarrera()
 
-  // Debounced search
-  const search = useCallback(async (term: string) => {
+  // Debounced search - ahora con filtro de carrera
+  const search = useCallback(async (term: string, cId: string | null) => {
     if (term.length < 2) {
       setResults([])
       return
     }
 
     setIsLoading(true)
-    const data = await searchMateriasForSchedule(term)
+    const data = await searchMateriasForSchedule(term, cId)
     setResults(data)
     setIsLoading(false)
   }, [])
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      search(searchTerm)
+      search(searchTerm, carreraId)
     }, 300)
 
     return () => clearTimeout(timer)
-  }, [searchTerm, search])
+  }, [searchTerm, carreraId, search])
 
   const isAdded = (nrc: string) => addedNRCs.includes(nrc)
 
   return (
     <aside className="w-80 md:w-96 flex flex-col border-r border-slate-200 bg-white z-10 shrink-0">
+      {/* Selector de Carrera */}
+      <div className="p-4 border-b border-slate-100 bg-gradient-to-r from-primary/5 to-cyan-500/5">
+        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+          Buscando en:
+        </div>
+        <CarreraSelector showLabel={false} className="w-full" />
+        {!carreraId && (
+          <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+            <span>⚠️</span> Selecciona tu carrera para ver materias
+          </p>
+        )}
+      </div>
+
       {/* Search Area */}
       <div className="p-4 border-b border-slate-100">
         <div className="relative">
@@ -66,6 +85,11 @@ export default function ScheduleSidebar({ onAddMateria, addedNRCs }: ScheduleSid
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
             {results.length > 0 ? `${results.length} resultados` : 'Resultados'}
           </span>
+          {carreraNombre && (
+            <span className="text-xs text-primary font-medium">
+              {carreraNombre.split(' ')[0]}
+            </span>
+          )}
         </div>
       </div>
 

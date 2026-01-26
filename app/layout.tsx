@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Lexend, Noto_Sans } from "next/font/google";
 import "./globals.css";
+import Providers from "./providers";
 
 const lexend = Lexend({
   variable: "--font-display",
@@ -15,7 +16,7 @@ const noto = Noto_Sans({
 
 export const metadata: Metadata = {
   title: "Aula Guía | BUAP",
-  description: "Eilge a tus profesores con datos reales.",
+  description: "Elige a tus profesores con datos reales.",
 };
 
 export default function RootLayout({
@@ -40,7 +41,10 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" 
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
+
