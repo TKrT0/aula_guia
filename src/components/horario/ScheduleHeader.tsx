@@ -15,6 +15,7 @@ interface ScheduleHeaderProps {
   onExport?: (format: 'image' | 'calendar' | 'print') => void
   onManageSchedules?: () => void
   onOpenSearch?: () => void
+  onOpenExport?: () => void
   isExporting?: boolean
   scheduleCount?: number
   isMobile?: boolean
@@ -28,6 +29,7 @@ export default function ScheduleHeader({
   onExport,
   onManageSchedules,
   onOpenSearch,
+  onOpenExport,
   isExporting = false,
   scheduleCount = 1,
   isMobile = false
@@ -156,6 +158,23 @@ export default function ScheduleHeader({
           className="md:hidden flex items-center justify-center size-9 rounded-lg bg-slate-100 dark:bg-slate-700"
         >
           <span className="material-symbols-outlined text-lg text-slate-600 dark:text-slate-300">folder</span>
+        </button>
+
+        {/* Export Mobile */}
+        <button
+          onClick={onOpenExport}
+          className="md:hidden px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center gap-2"
+        >
+          <span className="material-symbols-outlined text-[18px]">ios_share</span>
+          Exportar
+        </button>
+
+        {/* Search Mobile */}
+        <button
+          onClick={onOpenSearch}
+          className="md:hidden flex items-center justify-center size-9 rounded-lg bg-slate-100 dark:bg-slate-700"
+        >
+          <span className="material-symbols-outlined text-lg text-slate-600 dark:text-slate-300">search</span>
         </button>
 
         {/* User Menu */}

@@ -8,6 +8,7 @@ import ScheduleGrid from './ScheduleGrid'
 import ScheduleGridMobile from './ScheduleGridMobile'
 import ConflictAlert from './ConflictAlert'
 import ScheduleManager from './ScheduleManager'
+import ScheduleExportDrawer from './ScheduleExportDrawer'
 import MobileDrawer from '@/src/components/ui/MobileDrawer'
 import { useIsMobile } from '@/src/hooks/useMediaQuery'
 import { useToast } from '@/src/contexts/ToastContext'
@@ -38,6 +39,7 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
   const [showConflictAlert, setShowConflictAlert] = useState(true)
   const [showScheduleManager, setShowScheduleManager] = useState(false)
   const [showMobileSidebar, setShowMobileSidebar] = useState(false)
+  const [showExportDrawer, setShowExportDrawer] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   
   const isMobile = useIsMobile()
@@ -284,6 +286,7 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
         onExport={handleExport}
         onManageSchedules={() => setShowScheduleManager(true)}
         onOpenSearch={() => setShowMobileSidebar(true)}
+        onOpenExport={() => setShowExportDrawer(true)}
         isExporting={isExporting}
         scheduleCount={allSchedules.length}
         isMobile={isMobile}
@@ -354,6 +357,14 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
         onScheduleDeleted={handleScheduleDeleted}
         isOpen={showScheduleManager}
         onClose={() => setShowScheduleManager(false)}
+      />
+
+      <ScheduleExportDrawer
+        isOpen={showExportDrawer}
+        onClose={() => setShowExportDrawer(false)}
+        scheduleName={currentSchedule?.nombre || 'Mi Horario'}
+        materias={currentSchedule?.materias || []}
+        imageElementId="schedule-export-area"
       />
     </div>
   )

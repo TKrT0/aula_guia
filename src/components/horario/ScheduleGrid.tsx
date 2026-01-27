@@ -81,7 +81,7 @@ export default function ScheduleGrid({ materias, conflicts, onMateriaClick }: Sc
     : null
 
   return (
-    <div id="schedule-grid" className="flex-1 flex flex-col relative overflow-hidden bg-white dark:bg-slate-800">
+    <div id="schedule-export-area" className="flex-1 flex flex-col relative overflow-hidden bg-white dark:bg-slate-800">
       {/* Header de días */}
       <div className="grid grid-cols-[60px_repeat(6,1fr)] border-b border-slate-200 bg-white z-10 shrink-0 shadow-sm">
         <div className="p-3 border-r border-slate-100 flex items-end justify-center">

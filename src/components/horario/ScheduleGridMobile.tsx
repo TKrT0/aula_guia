@@ -94,7 +94,7 @@ export default function ScheduleGridMobile({
   });
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-900">
+    <div id="schedule-export-area" className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-900">
       {/* Selector de días */}
       <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 z-10 px-2 py-3">
         <div className="flex gap-1">
