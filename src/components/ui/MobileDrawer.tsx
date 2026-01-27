@@ -57,7 +57,7 @@ export default function MobileDrawer({ isOpen, onClose, title, children }: Mobil
         </div>
 
         {/* Content - ahora con scroll */}
-        <div className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
           {children}
         </div>
       </div>

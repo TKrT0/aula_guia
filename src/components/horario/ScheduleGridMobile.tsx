@@ -68,8 +68,26 @@ export default function ScheduleGridMobile({
       }));
   });
 
+    // DEDUPE defensivo: evita tarjetas repetidas
+  const bloquesUnique = Array.from(
+    new Map(
+      bloquesDelDia.map((x) => {
+        const key = [
+          x.materia.nrc,
+          x.bloque.dia,
+          x.bloque.hora_inicio,
+          x.bloque.hora_fin,
+          x.bloque.salon ?? '',
+          x.bloque.edificio ?? '',
+        ].join('|');
+        return [key, x] as const;
+      })
+    ).values()
+  );
+
+
   // Ordenar por hora de inicio
-  const bloquesSorted = bloquesDelDia.sort((a, b) => {
+  const bloquesSorted = bloquesUnique.sort((a, b) => {
     const timeA = a.bloque.hora_inicio.split(':').map(Number);
     const timeB = b.bloque.hora_inicio.split(':').map(Number);
     return timeA[0] * 60 + timeA[1] - (timeB[0] * 60 + timeB[1]);
@@ -129,7 +147,8 @@ export default function ScheduleGridMobile({
             
             return (
               <div
-                key={`${item.materia.id}-${idx}`}
+                key={`${item.materia.nrc}-${item.bloque.id}`}
+
                 onClick={() => onMateriaClick?.(item.materia)}
                 className={`
                   relative overflow-hidden rounded-2xl p-4 cursor-pointer
