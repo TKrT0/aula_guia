@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { searchMateriasForSchedule } from '@/src/lib/services/scheduleService'
 import { useCarrera } from '@/src/contexts/CarreraContext'
 import CarreraSelector from '@/src/components/ui/CarreraSelector'
-
-
+import type { MateriaHorario } from '@/src/lib/services/scheduleService'
 
 interface MateriaResult {
   materia_id: string
@@ -15,13 +14,54 @@ interface MateriaResult {
   nrc: string
   rating_promedio?: number
   creditos?: number
-
+  bloques?: MateriaHorario[]
 }
 
 interface ScheduleSidebarProps {
   onAddMateria: (materia: MateriaResult) => void
   addedNRCs: string[]
 }
+
+const DAY_ABREV: Record<string, string> = {
+  lunes: 'Lun',
+  martes: 'Mar',
+  miercoles: 'Mié',
+  miércoles: 'Mié',
+  jueves: 'Jue',
+  viernes: 'Vie',
+  sabado: 'Sáb',
+  sábado: 'Sáb',
+  domingo: 'Dom',
+}
+
+function hhmm(time: string) {
+  return time?.slice(0, 5) ?? '' // "07:00:00" -> "07:00"
+}
+
+function formatHorarioResumen(bloques?: { dia: string; hora_inicio: string; hora_fin: string }[]) {
+  if (!bloques || bloques.length === 0) return ''
+
+  const groups = new Map<string, { inicio: string; fin: string; dias: string[] }>()
+  for (const b of bloques) {
+    const inicio = hhmm(b.hora_inicio)
+    const fin = hhmm(b.hora_fin)
+    const key = `${inicio}-${fin}`
+    const dia = DAY_ABREV[b.dia] ?? b.dia
+
+    const g = groups.get(key) ?? { inicio, fin, dias: [] }
+    g.dias.push(dia)
+    groups.set(key, g)
+  }
+
+  const parts: string[] = []
+  for (const g of groups.values()) {
+    const diasUnique = Array.from(new Set(g.dias))
+    parts.push(`${diasUnique.join(', ')} ${g.inicio}–${g.fin}`)
+  }
+
+  return parts.slice(0, 2).join(' · ')
+}
+
 
 export default function ScheduleSidebar({ onAddMateria, addedNRCs }: ScheduleSidebarProps) {
   const [searchTerm, setSearchTerm] = useState('')
@@ -117,6 +157,7 @@ export default function ScheduleSidebar({ onAddMateria, addedNRCs }: ScheduleSid
 
         {results.map((materia) => {
           const added = isAdded(materia.nrc)
+          const resumen = formatHorarioResumen(materia.bloques)
           
           return (
             <div
@@ -146,23 +187,34 @@ export default function ScheduleSidebar({ onAddMateria, addedNRCs }: ScheduleSid
                   </div>
                 )}
               </div>
-              
-              <div className="pl-2 flex items-center justify-between mt-2">
-                <p className="text-xs text-slate-600 flex items-center gap-1 truncate">
-                  <span className="material-symbols-outlined text-[14px] text-slate-400">person</span>
-                  {materia.profesor_nombre}
-                </p>
-                {added ? (
-                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">check</span>
-                    Agregada
-                  </span>
-                ) : (
-                  <span className="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">
-                    add_circle
-                  </span>
-                )}
-              </div>
+              <div className="pl-2 flex items-start justify-between gap-2 mt-2">
+  <div className="min-w-0 flex-1">
+    <p className="text-xs text-slate-600 flex items-center gap-1 truncate">
+      <span className="material-symbols-outlined text-[14px] text-slate-400">person</span>
+      {materia.profesor_nombre}
+    </p>
+
+    {resumen && (
+      <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1 line-clamp-2">
+        <span className="material-symbols-outlined text-[12px] text-slate-400">schedule</span>
+        {resumen}
+      </p>
+    )}
+  </div>
+
+  <div className="shrink-0 pt-0.5">
+    {added ? (
+      <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1">
+        <span className="material-symbols-outlined text-[14px]">check</span>
+        Agregada
+      </span>
+    ) : (
+      <span className="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">
+        add_circle
+      </span>
+    )}
+  </div>
+</div>
             </div>
           )
         })}
