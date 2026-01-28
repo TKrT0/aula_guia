@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { obtenerSugerencias } from '@/src/lib/supabaseQueries';
+import { obtenerSugerencias } from '@/src/lib/supabase/queries';
 import { useCarrera } from '@/src/contexts/CarreraContext';
 
 interface SearchBarProps {

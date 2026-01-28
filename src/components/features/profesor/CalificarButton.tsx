@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import ReviewModal from './ReviewModal';
 import { getMateriasByProfesor } from '@/src/lib/services/professorService';
+import ReviewModal from '@/src/components/features/profesor/ReviewModal';
 
 interface Materia {
   materia_id: string;

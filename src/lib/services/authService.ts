@@ -1,4 +1,4 @@
-import { createClient } from '@/src/utils/supabase/client'
+import { createClient } from '@/src/lib/supabase/client'
 
 export async function signInWithGoogle(redirectTo: string = '/horario') {
   const supabase = createClient()

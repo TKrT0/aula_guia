@@ -1,4 +1,4 @@
-import { createClient } from '@/src/utils/supabase/client';
+import { createClient } from '@/src/lib/supabase/client';
 
 // Función Principal de Búsqueda (Grid) - Con filtro de carrera opcional
 export const buscarProfesoresYMaterias = async (termino: string, carreraId?: string | null) => {

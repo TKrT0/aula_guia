@@ -1,5 +1,5 @@
 // src/lib/services/professorService.ts
-import { createClient } from '@/src/utils/supabase/client'; // Verifica que esta ruta sea la correcta
+import { createClient } from '@/src/lib/supabase/client'; // Verifica que esta ruta sea la correcta
 
 export const getProfessorProfile = async (id: string) => {
   const supabase = createClient();

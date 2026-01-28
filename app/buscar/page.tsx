@@ -2,8 +2,8 @@
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Navbar from "@/src/components/layout/Navbar";
-import { buscarProfesoresYMaterias } from '@/src/lib/supabaseQueries';
-import ProfessorCard from '@/src/components/search/ProfessorCard';
+import { buscarProfesoresYMaterias } from '@/src/lib/supabase/queries';
+import ProfessorCard from '@/src/components/features/search/ProfessorCard';
 import EmptyState from '@/src/components/ui/EmptyState';
 import CarreraSelector from '@/src/components/ui/CarreraSelector';
 import { useCarrera } from '@/src/contexts/CarreraContext';

@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import Navbar from '../layout/Navbar'; 
+import Navbar from '../../layout/Navbar'; 
 import SearchBar from '../search/SearchBar'; 
-import CarreraSelector from '../ui/CarreraSelector';
+import CarreraSelector from '../../ui/CarreraSelector';
 import { useRouter } from 'next/navigation';
 
 export default function Hero() {

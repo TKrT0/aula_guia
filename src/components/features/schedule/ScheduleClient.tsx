@@ -12,7 +12,7 @@ import ScheduleExportDrawer from './ScheduleExportDrawer'
 import MobileDrawer from '@/src/components/ui/MobileDrawer'
 import { useIsMobile } from '@/src/hooks/useMediaQuery'
 import { useToast } from '@/src/contexts/ToastContext'
-import { exportAsImage, exportToCalendar } from '@/src/lib/utils/exportSchedule'
+import { exportAsImage, exportToCalendar } from '@/src/lib/export/exportSchedule'
 import { generateSchedulePDF } from './SchedulePDF'
 import { 
   getUserSchedules, 

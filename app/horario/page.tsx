@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/src/utils/supabase/client'
-import LoginPrompt from '@/src/components/horario/LoginPrompt'
-import ScheduleClient from '@/src/components/horario/ScheduleClient'
+import { createClient } from '@/src/lib/supabase/client'
+import LoginPrompt from '@/src/components/features/schedule/LoginPrompt'
+import ScheduleClient from '@/src/components/features/schedule/ScheduleClient'
 import type { User, Session } from '@supabase/supabase-js'
 
 export default function HorarioPage() {

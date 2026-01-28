@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import MobileDrawer from '@/src/components/ui/MobileDrawer'
 import type { HorarioMateria } from '@/src/lib/services/scheduleService'
-import { exportAsImage } from '@/src/lib/utils/exportSchedule' // ajusta ruta si tu archivo se llama distinto
-import { generateSchedulePDF } from '@/src/components/horario/SchedulePDF' // ajusta si está en otra ruta
+import { exportAsImage } from '@/src/lib/export/exportSchedule' // ajusta ruta si tu archivo se llama distinto
+import { generateSchedulePDF } from '@/src/components/features/schedule/SchedulePDF' // ajusta si está en otra ruta
 
 interface Props {
   isOpen: boolean

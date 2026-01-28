@@ -1,10 +1,9 @@
 import { getProfessorProfile } from '@/src/lib/services/professorService';
-import ReviewsList from '@/src/components/profesor/ReviewsList';
-import CalificarButton from '@/src/components/profesor/CalificarButton';
+import ReviewsList from '@/src/components/features/profesor/ReviewsList';
+import CalificarButton from '@/src/components/features/profesor/CalificarButton';
 import Navbar from '@/src/components/layout/Navbar';
 import BackButton from '@/src/components/ui/BackButton';
 
-// Esta función es especial de Next.js para páginas dinámicas (Server Components)
 export default async function ProfesorDetalle({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
