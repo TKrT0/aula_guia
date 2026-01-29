@@ -1,8 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Calendar, Trash2, Plus, Loader2 } from 'lucide-react';
 import { Horario, createSchedule, deleteSchedule } from '@/src/lib/services/scheduleService';
-import { useToast } from '@/src/contexts/ToastContext';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 
 interface ScheduleManagerProps {
   schedules: Horario[];
@@ -26,13 +31,12 @@ export default function ScheduleManager({
   const [isCreating, setIsCreating] = useState(false);
   const [newName, setNewName] = useState('');
   const [loading, setLoading] = useState(false);
-  const { success, error } = useToast();
 
   if (!isOpen) return null;
 
   const handleCreate = async () => {
     if (!newName.trim()) {
-      error('Ingresa un nombre para el horario');
+      toast.error('Ingresa un nombre para el horario');
       return;
     }
 
@@ -41,12 +45,12 @@ export default function ScheduleManager({
     setLoading(false);
 
     if (result.success && result.data) {
-      success('Horario creado exitosamente');
+      toast.success('Horario creado exitosamente');
       onScheduleCreated(result.data);
       setNewName('');
       setIsCreating(false);
     } else {
-      error(result.error || 'Error al crear horario');
+      toast.error(result.error || 'Error al crear horario');
     }
   };
 
@@ -60,119 +64,167 @@ export default function ScheduleManager({
     setLoading(false);
 
     if (result.success) {
-      success('Horario eliminado');
+      toast.success('Horario eliminado');
       onScheduleDeleted(id);
     } else {
-      error(result.error || 'Error al eliminar horario');
+      toast.error(result.error || 'Error al eliminar horario');
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden">
+    <AnimatePresence>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-background rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden border"
+      >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-800 dark:text-white">Mis Horarios</h2>
-          <button
+        <div className="px-6 py-4 border-b flex items-center justify-between">
+          <h2 className="text-lg font-bold">Mis Horarios</h2>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
           >
-            <span className="material-symbols-outlined">close</span>
-          </button>
+            <X className="size-5" />
+          </Button>
         </div>
 
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(80vh-140px)]">
           {/* Lista de horarios */}
           {schedules.length === 0 ? (
-            <div className="text-center py-8">
-              <span className="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600">calendar_month</span>
-              <p className="text-slate-500 dark:text-slate-400 mt-2">No tienes horarios aún</p>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-8"
+            >
+              <Calendar className="size-12 text-muted-foreground mx-auto mb-2" />
+              <p className="text-muted-foreground">No tienes horarios aún</p>
+            </motion.div>
           ) : (
-            <div className="space-y-2">
-              {schedules.map((schedule) => (
-                <div
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-2"
+            >
+              {schedules.map((schedule, idx) => (
+                <motion.div
                   key={schedule.id}
-                  className={`
-                    flex items-center justify-between p-3 rounded-xl border-2 transition-all cursor-pointer
-                    ${schedule.id === activeScheduleId
-                      ? 'border-primary bg-primary/5'
-                      : 'border-slate-100 dark:border-slate-700 hover:border-slate-200 dark:hover:border-slate-600'
-                    }
-                  `}
-                  onClick={() => {
-                    onSelectSchedule(schedule.id);
-                    onClose();
-                  }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.05 }}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${schedule.id === activeScheduleId ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'}`} />
-                    <div>
-                      <p className="font-semibold text-slate-800 dark:text-white text-sm">{schedule.nombre}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {schedule.total_creditos} créditos • {schedule.semestre || 'Sin semestre'}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(schedule.id, schedule.nombre);
+                  <Card
+                    className={`
+                      flex items-center justify-between p-3 cursor-pointer transition-all
+                      ${schedule.id === activeScheduleId
+                        ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                        : 'hover:border-primary/50'
+                      }
+                    `}
+                    onClick={() => {
+                      onSelectSchedule(schedule.id);
+                      onClose();
                     }}
-                    className="p-1.5 text-slate-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-                    disabled={loading}
                   >
-                    <span className="material-symbols-outlined text-lg">delete</span>
-                  </button>
-                </div>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${schedule.id === activeScheduleId ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+                      <div>
+                        <p className="font-semibold text-sm">{schedule.nombre}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {schedule.total_creditos} créditos • {schedule.semestre || 'Sin semestre'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(schedule.id, schedule.nombre);
+                      }}
+                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      disabled={loading}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </Card>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
 
           {/* Crear nuevo */}
+          <AnimatePresence mode="wait">
           {isCreating ? (
-            <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-              <input
+            <motion.div 
+              key="form"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-4 p-4 bg-muted/50 rounded-xl"
+            >
+              <Input
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="Nombre del horario..."
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 autoFocus
                 onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
               />
               <div className="flex gap-2 mt-3">
-                <button
+                <Button
                   onClick={handleCreate}
                   disabled={loading}
-                  className="flex-1 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  className="flex-1"
                 >
-                  {loading ? 'Creando...' : 'Crear'}
-                </button>
-                <button
+                  {loading ? (
+                    <><Loader2 className="size-4 animate-spin mr-2" /> Creando...</>
+                  ) : 'Crear'}
+                </Button>
+                <Button
+                  variant="ghost"
                   onClick={() => {
                     setIsCreating(false);
                     setNewName('');
                   }}
-                  className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm font-semibold transition-colors"
                 >
                   Cancelar
-                </button>
+                </Button>
               </div>
-            </div>
+            </motion.div>
           ) : (
-            <button
-              onClick={() => setIsCreating(true)}
-              className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-xl text-slate-500 dark:text-slate-400 hover:border-primary hover:text-primary transition-colors"
+            <motion.div
+              key="button"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
-              <span className="material-symbols-outlined">add</span>
-              <span className="font-semibold text-sm">Crear nuevo horario</span>
-            </button>
+              <Button
+                variant="outline"
+                onClick={() => setIsCreating(true)}
+                className="mt-4 w-full border-dashed"
+              >
+                <Plus className="size-4 mr-2" />
+                Crear nuevo horario
+              </Button>
+            </motion.div>
           )}
+          </AnimatePresence>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+    </AnimatePresence>
   );
 }

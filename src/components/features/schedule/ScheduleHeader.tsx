@@ -1,11 +1,44 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { signOut } from '@/src/lib/services/authService'
 import { useRouter } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 import type { ConflictInfo } from '@/src/lib/services/scheduleService'
+import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  GraduationCap, 
+  Calendar, 
+  ChevronDown, 
+  Download, 
+  Image, 
+  CalendarDays, 
+  FileText, 
+  Folder,
+  Share2,
+  Search,
+  LogOut,
+  CheckCircle2,
+  AlertTriangle,
+  Loader2
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface ScheduleHeaderProps {
   user: User | null
@@ -16,6 +49,7 @@ interface ScheduleHeaderProps {
   onManageSchedules?: () => void
   onOpenSearch?: () => void
   onOpenExport?: () => void
+  onShowConflicts?: () => void
   isExporting?: boolean
   scheduleCount?: number
   isMobile?: boolean
@@ -30,12 +64,11 @@ export default function ScheduleHeader({
   onManageSchedules,
   onOpenSearch,
   onOpenExport,
+  onShowConflicts,
   isExporting = false,
   scheduleCount = 1,
-  isMobile = false
 }: ScheduleHeaderProps) {
   const router = useRouter()
-  const [showExportMenu, setShowExportMenu] = useState(false)
 
   const handleSignOut = async () => {
     await signOut()
@@ -44,170 +77,268 @@ export default function ScheduleHeader({
   }
 
   return (
-    <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-6 py-3 shrink-0 z-20 shadow-sm">
-      <div className="flex items-center gap-4">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="size-8 bg-primary/10 text-primary flex items-center justify-center rounded-lg">
-            <span className="material-symbols-outlined text-2xl">school</span>
-          </div>
-          <h2 className="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight">Aula Guía</h2>
-        </Link>
-        
-        <div className="h-6 w-px bg-slate-200 dark:bg-slate-600 mx-2 hidden md:block" />
-        
-        {/* Schedule Selector */}
-        <button
-          onClick={onManageSchedules}
-          className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-        >
-          <span className="material-symbols-outlined text-lg text-primary">calendar_month</span>
-          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 max-w-[150px] truncate">{scheduleName}</span>
-          {scheduleCount > 1 && (
-            <span className="text-xs text-slate-500 dark:text-slate-400">+{scheduleCount - 1}</span>
-          )}
-          <span className="material-symbols-outlined text-sm text-slate-400">expand_more</span>
-        </button>
-      </div>
-
-      <div className="flex items-center gap-4">
-        {/* Stats */}
-        <div className="hidden lg:flex items-center gap-4">
-          <div className="flex flex-col items-end">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Carga</span>
-            <span className="text-slate-900 dark:text-white font-bold text-sm">{totalCreditos} cr</span>
-          </div>
-          <div className="h-8 w-px bg-slate-200 dark:bg-slate-600" />
-          <div className="flex flex-col items-end">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Estado</span>
-            <div className={`flex items-center gap-1 font-bold text-sm ${conflicts.length === 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-              <span>{conflicts.length === 0 ? 'OK' : `${conflicts.length} ⚠`}</span>
-              <span className="material-symbols-outlined text-[16px]">
-                {conflicts.length === 0 ? 'check_circle' : 'warning'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Export Dropdown */}
-        <div className="relative">
-          <button 
-            onClick={() => setShowExportMenu(!showExportMenu)}
-            disabled={isExporting}
-            className="hidden sm:flex items-center justify-center gap-2 cursor-pointer overflow-hidden rounded-lg h-9 px-4 bg-primary hover:bg-blue-600 transition-colors text-white text-sm font-bold shadow-sm shadow-blue-200 disabled:opacity-50"
-          >
-            {isExporting ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-            ) : (
-              <span className="material-symbols-outlined text-[20px]">download</span>
-            )}
-            <span className="truncate">{isExporting ? 'Exportando...' : 'Exportar'}</span>
-            <span className="material-symbols-outlined text-sm">expand_more</span>
-          </button>
+    <TooltipProvider delayDuration={300}>
+      <motion.header 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+        className="flex items-center justify-between whitespace-nowrap border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0F1C2E] px-4 md:px-6 py-3 shrink-0 z-20 shadow-sm"
+      >
+        {/* Left Section: Logo + Schedule Selector */}
+        <div className="flex items-center gap-3 md:gap-4">
+          <Link href="/" className="flex items-center gap-2 group">
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="size-8 bg-gradient-to-br from-[#003A5C] to-[#00507A] dark:from-[#00BCD4] dark:to-[#2B8CEE] text-white flex items-center justify-center rounded-lg shadow-md"
+            >
+              <GraduationCap className="size-5" />
+            </motion.div>
+            <h2 className="text-slate-800 dark:text-white text-lg font-bold leading-tight tracking-tight hidden sm:block group-hover:text-[#00BCD4] dark:group-hover:text-cyan-400 transition-colors">
+              Aula Guía
+            </h2>
+          </Link>
           
-          {showExportMenu && !isExporting && (
-            <>
-              <div className="fixed inset-0 z-10" onClick={() => setShowExportMenu(false)} />
-              <div className="absolute right-0 top-full mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-600 py-2 min-w-[200px] z-20">
-                <button
-                  onClick={() => {
-                    onExport?.('image')
-                    setShowExportMenu(false)
-                  }}
-                  className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-3"
-                >
-                  <span className="material-symbols-outlined text-lg text-emerald-500">image</span>
-                  <div>
-                    <div className="font-medium">Descargar Imagen</div>
-                    <div className="text-xs text-slate-400">PNG de alta calidad</div>
-                  </div>
-                </button>
-                <button
-                  onClick={() => {
-                    onExport?.('calendar')
-                    setShowExportMenu(false)
-                  }}
-                  className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-3"
-                >
-                  <span className="material-symbols-outlined text-lg text-blue-500">calendar_month</span>
-                  <div>
-                    <div className="font-medium">Sincronizar Calendario</div>
-                    <div className="text-xs text-slate-400">Exportar a Google/Apple</div>
-                  </div>
-                </button>
-                <button
-                  onClick={() => {
-                    onExport?.('print')
-                    setShowExportMenu(false)
-                  }}
-                  className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-3"
-                >
-                  <span className="material-symbols-outlined text-lg text-amber-500">print</span>
-                  <div>
-                    <div className="font-medium">Imprimir / PDF</div>
-                    <div className="text-xs text-slate-400">Guardar como PDF</div>
-                  </div>
-                </button>
-              </div>
-            </>
-          )}
+          <Separator orientation="vertical" className="h-6 hidden md:block" />
+          
+          {/* Schedule Selector - Desktop */}
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              variant="secondary"
+              onClick={onManageSchedules}
+              className="hidden md:flex items-center gap-2 h-9"
+            >
+              <Calendar className="size-4 text-primary" />
+              <span className="max-w-[150px] truncate font-semibold">{scheduleName}</span>
+              {scheduleCount > 1 && (
+                <Badge variant="secondary" className="text-xs px-1.5">
+                  +{scheduleCount - 1}
+                </Badge>
+              )}
+              <ChevronDown className="size-4 text-muted-foreground" />
+            </Button>
+          </motion.div>
         </div>
 
-        {/* Manage Schedules Mobile */}
-        <button
-          onClick={onManageSchedules}
-          className="md:hidden flex items-center justify-center size-9 rounded-lg bg-slate-100 dark:bg-slate-700"
-        >
-          <span className="material-symbols-outlined text-lg text-slate-600 dark:text-slate-300">folder</span>
-        </button>
+        {/* Right Section: Stats + Actions */}
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* Stats Badges - Desktop */}
+          <div className="hidden lg:flex items-center gap-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.div 
+                  whileHover={{ scale: 1.05 }}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50"
+                >
+                  <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Carga</span>
+                  <Badge variant="secondary" className="font-bold">
+                    {totalCreditos} cr
+                  </Badge>
+                </motion.div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Total de créditos inscritos</p>
+              </TooltipContent>
+            </Tooltip>
 
-        {/* Export Mobile */}
-        <button
-          onClick={onOpenExport}
-          className="md:hidden px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center gap-2"
-        >
-          <span className="material-symbols-outlined text-[18px]">ios_share</span>
-          Exportar
-        </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={conflicts.length > 0 ? onShowConflicts : undefined}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
+                    conflicts.length === 0 
+                      ? 'bg-emerald-500/10' 
+                      : 'bg-destructive/10 cursor-pointer hover:bg-destructive/20'
+                  }`}
+                >
+                  <AnimatePresence mode="wait">
+                    {conflicts.length === 0 ? (
+                      <motion.div
+                        key="ok"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        className="flex items-center gap-1.5"
+                      >
+                        <CheckCircle2 className="size-4 text-emerald-600" />
+                        <span className="text-sm font-bold text-emerald-600">OK</span>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="conflicts"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        className="flex items-center gap-1.5"
+                      >
+                        <AlertTriangle className="size-4 text-destructive" />
+                        <span className="text-sm font-bold text-destructive">
+                          {conflicts.length} conflicto{conflicts.length !== 1 ? 's' : ''}
+                        </span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {conflicts.length === 0 
+                  ? 'Sin conflictos de horario' 
+                  : 'Clic para ver los conflictos'
+                }
+              </TooltipContent>
+            </Tooltip>
+          </div>
 
-        {/* Search Mobile */}
-        <button
-          onClick={onOpenSearch}
-          className="md:hidden flex items-center justify-center size-9 rounded-lg bg-slate-100 dark:bg-slate-700"
-        >
-          <span className="material-symbols-outlined text-lg text-slate-600 dark:text-slate-300">search</span>
-        </button>
+          {/* Export Dropdown - Desktop */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                className="hidden sm:flex gap-2"
+                disabled={isExporting}
+              >
+                <AnimatePresence mode="wait">
+                  {isExporting ? (
+                    <motion.div
+                      key="loading"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Loader2 className="size-4 animate-spin" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="download"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      <Download className="size-4" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <span>{isExporting ? 'Exportando...' : 'Exportar'}</span>
+                <ChevronDown className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Opciones de exportación</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={() => onExport?.('image')}
+                className="cursor-pointer"
+              >
+                <Image className="size-4 text-emerald-500" />
+                <div className="flex flex-col">
+                  <span>Descargar Imagen</span>
+                  <span className="text-xs text-muted-foreground">PNG de alta calidad</span>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => onExport?.('calendar')}
+                className="cursor-pointer"
+              >
+                <CalendarDays className="size-4 text-blue-500" />
+                <div className="flex flex-col">
+                  <span>Calendario (ICS)</span>
+                  <span className="text-xs text-muted-foreground">Google/Apple Calendar</span>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => onExport?.('print')}
+                className="cursor-pointer"
+              >
+                <FileText className="size-4 text-amber-500" />
+                <div className="flex flex-col">
+                  <span>Imprimir / PDF</span>
+                  <span className="text-xs text-muted-foreground">Guardar como PDF</span>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        {/* User Menu */}
-        {user && (
-          <div className="flex items-center gap-3">
-            <div className="relative group">
-              <div 
-                className="bg-center bg-no-repeat bg-cover rounded-full size-9 border border-slate-200 dark:border-slate-600 cursor-pointer"
-                style={{ 
-                  backgroundImage: user.user_metadata?.avatar_url 
-                    ? `url("${user.user_metadata.avatar_url}")` 
-                    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                }}
-              />
-              <div className="absolute right-0 top-full mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-600 py-2 min-w-[160px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-30">
-                <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700">
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
+          {/* Mobile Actions */}
+          <div className="flex md:hidden items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onManageSchedules}
+                >
+                  <Folder className="size-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Gestionar horarios</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onOpenExport}
+                >
+                  <Share2 className="size-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Exportar</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onOpenSearch}
+                >
+                  <Search className="size-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Buscar materias</TooltipContent>
+            </Tooltip>
+          </div>
+
+          {/* User Menu */}
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                >
+                  <div 
+                    className="bg-center bg-no-repeat bg-cover rounded-full size-9 border-2 border-border cursor-pointer"
+                    style={{ 
+                      backgroundImage: user.user_metadata?.avatar_url 
+                        ? `url("${user.user_metadata.avatar_url}")` 
+                        : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                    }}
+                  />
+                </motion.button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-3 py-2">
+                  <p className="text-sm font-medium truncate">
                     {user.user_metadata?.full_name || 'Usuario'}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                 </div>
-                <button
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
                   onClick={handleSignOut}
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center gap-2"
+                  className="cursor-pointer text-destructive focus:text-destructive"
                 >
-                  <span className="material-symbols-outlined text-[18px]">logout</span>
+                  <LogOut className="size-4" />
                   Cerrar sesión
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </header>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
+      </motion.header>
+    </TooltipProvider>
   )
 }

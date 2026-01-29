@@ -1,0 +1,8 @@
+export { default as Navigation } from './Navigation'
+export { default as HeroBackground } from './HeroBackground'
+export { default as HeroSection } from './HeroSection'
+export { default as BentoGrid } from './BentoGrid'
+export { default as HowItWorks } from './HowItWorks'
+export { default as RealShowcase } from './RealShowcase'
+export { default as FinalCTA } from './FinalCTA'
+export { default as Footer } from './Footer'

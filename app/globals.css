@@ -5,19 +5,51 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-primary: #003a5c;
-  --color-accent: #00bcd4;
-  --color-accent-light: #e0f7fa;
-  --color-background-light: #ffffff;
-  --color-background-dark: #0f1c23;
+  /* ===== PALETA OFICIAL BUAP-INSPIRED ===== */
 
-  --font-display: "Lexend", sans-serif;
-  --font-body: "Noto Sans", sans-serif;
+  /* Primary (Navy) */
+  --color-primary: #003A5C;
+  --color-primary-hover: #00507A;
+
+  /* Accent (Cyan) */
+  --color-accent: #00BCD4;
+  --color-accent-soft: #E0F7FA;
+
+  /* Backgrounds */
+  --color-background-light: #F8FAFC;
+  --color-background-dark: #0B1220;
+  --color-card-dark: #0F1C2E;
+
+  /* Text */
+  --color-text: #0F172A;
+  --color-muted: #64748B;
+  --color-border: #E2E8F0;
+  --color-destructive: #EF4444;
+
+  /* Aurora Colors (solo para fondo) */
+  --aurora-cyan: rgba(0, 188, 212, 0.35);
+  --aurora-blue: rgba(43, 140, 238, 0.30);
+  --aurora-indigo: rgba(79, 70, 229, 0.18);
+  --glow-soft: rgba(0, 188, 212, 0.20);
+
+  /* Aurora Light (reducido 40%) */
+  --aurora-cyan-light: rgba(0, 188, 212, 0.15);
+  --aurora-blue-light: rgba(43, 140, 238, 0.12);
+  --aurora-indigo-light: rgba(79, 70, 229, 0.08);
+  --glow-soft-light: rgba(0, 188, 212, 0.10);
+
+  /* Grid */
+  --grid-dark: rgba(148, 163, 184, 0.08);
+  --grid-light: rgba(15, 23, 42, 0.06);
+
+  /* Fonts */
+  --font-display: "Sora", sans-serif;
+  --font-body: "Inter", sans-serif;
 }
 
 @layer base {
   body {
-    @apply bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased font-display;
+    @apply bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased font-body;
   }
 }
 
@@ -66,6 +98,15 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --animate-blink-cursor: blink-cursor 1.2s step-end infinite;
+  @keyframes blink-cursor {
+  0%, 49% {
+    opacity: 1;
+    }
+  50%, 100% {
+    opacity: 0;
+    }
+  }
 }
 
 :root {
@@ -145,3 +186,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Tu Scrollbar Personalizado */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }

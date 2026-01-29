@@ -2,18 +2,31 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import type { User } from '@supabase/supabase-js'
+import { motion, AnimatePresence } from 'framer-motion'
 import ScheduleHeader from './ScheduleHeader'
-import ScheduleSidebar from './ScheduleSidebar'
+import ScheduleSidebar, { type MateriaResult } from './ScheduleSidebar'
 import ScheduleGrid from './ScheduleGrid'
 import ScheduleGridMobile from './ScheduleGridMobile'
-import ConflictAlert from './ConflictAlert'
 import ScheduleManager from './ScheduleManager'
 import ScheduleExportDrawer from './ScheduleExportDrawer'
+import ScheduleResultPreviewSheet from './ScheduleResultPreviewSheet'
+import ConflictDialog from './ConflictDialog'
 import MobileDrawer from '@/src/components/ui/MobileDrawer'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { useIsMobile } from '@/src/hooks/useMediaQuery'
-import { useToast } from '@/src/contexts/ToastContext'
+import { toast } from 'sonner'
 import { exportAsImage, exportToCalendar } from '@/src/lib/export/exportSchedule'
 import { generateSchedulePDF } from './SchedulePDF'
+import { 
+  Plus, 
+  Share2, 
+  Trash2, 
+  Calendar,
+  AlertTriangle,
+  Loader2,
+  GraduationCap
+} from 'lucide-react'
 import { 
   getUserSchedules, 
   getScheduleWithMaterias, 
@@ -42,8 +55,10 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
   const [showExportDrawer, setShowExportDrawer] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   
+  const [previewMateria, setPreviewMateria] = useState<MateriaResult | null>(null)
+  const [showConflictDialog, setShowConflictDialog] = useState(false)
+  
   const isMobile = useIsMobile()
-  const { success, error, info } = useToast()
 
   // Cargar o crear horario al iniciar
   const loadSchedule = useCallback(async () => {
@@ -64,7 +79,7 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
           const detectedConflicts = await detectAllConflicts(scheduleWithMaterias.id)
           setConflicts(detectedConflicts)
           if (detectedConflicts.length > 0) {
-            info(`${detectedConflicts.length} conflicto(s) de horario detectado(s)`)
+            toast.warning(`${detectedConflicts.length} conflicto(s) de horario detectado(s)`)
           }
         }
       } else {
@@ -73,17 +88,17 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
         if (result.success && result.data) {
           setCurrentSchedule({ ...result.data, materias: [] })
           setAllSchedules([result.data])
-          success('¡Horario creado! Agrega materias desde el panel izquierdo')
+          toast.success('¡Horario creado! Agrega materias desde el panel izquierdo')
         } else {
-          error('Error al crear horario inicial')
+          toast.error('Error al crear horario inicial')
         }
       }
     } catch (err) {
-      error('Error al cargar horarios')
+      toast.error('Error al cargar horarios')
     }
     
     setIsLoading(false)
-  }, [success, error, info])
+  }, [])
 
   useEffect(() => {
     loadSchedule()
@@ -136,18 +151,17 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
         }
       })
 
-      success(`${materia.materia_nombre} agregada`)
+      toast.success(`${materia.materia_nombre} agregada`)
 
       // Re-detectar conflictos
       const detectedConflicts = await detectAllConflicts(currentSchedule.id)
       setConflicts(detectedConflicts)
-      setShowConflictAlert(detectedConflicts.length > 0)
       
       if (result.conflicts && result.conflicts.length > 0) {
-        error(`¡Advertencia! Hay conflictos de horario`)
+        setShowConflictDialog(true)
       }
     } else {
-      error(result.error || 'Error al agregar materia')
+      toast.error(result.error || 'Error al agregar materia')
     }
   }
 
@@ -167,13 +181,13 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
         }
       })
 
-      success(`${materia.materia_nombre} eliminada`)
+      toast.success(`${materia.materia_nombre} eliminada`)
 
       // Re-detectar conflictos
       const detectedConflicts = await detectAllConflicts(currentSchedule.id)
       setConflicts(detectedConflicts)
     } else {
-      error(result.error || 'Error al eliminar materia')
+      toast.error(result.error || 'Error al eliminar materia')
     }
   }
 
@@ -187,15 +201,16 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
     
     try {
       if (format === 'image') {
-        info('Generando imagen...')
+        toast.loading('Generando imagen...')
         const result = await exportAsImage('schedule-grid', filename)
+        toast.dismiss()
         if (result) {
-          success('¡Imagen descargada!')
+          toast.success('¡Imagen descargada!')
         } else {
-          error('Error al generar imagen')
+          toast.error('Error al generar imagen')
         }
       } else if (format === 'calendar') {
-        info('Generando archivo de calendario...')
+        toast.loading('Generando archivo de calendario...')
         // Recopilar todos los bloques de las materias
         const bloques = (currentSchedule?.materias || []).flatMap(materia => 
           (materia.bloques || []).map(bloque => ({
@@ -208,40 +223,71 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
             nrc: materia.nrc,
           }))
         )
+        toast.dismiss()
         
         if (bloques.length === 0) {
-          error('No hay materias para exportar al calendario')
+          toast.error('No hay materias para exportar al calendario')
         } else {
           const result = await exportToCalendar(bloques, currentSchedule?.nombre || 'Mi Horario')
           if (result) {
-            success('¡Archivo .ics descargado! Ábrelo para importar a tu calendario')
+            toast.success('¡Archivo .ics descargado!', {
+              description: 'Ábrelo para importar a tu calendario'
+            })
           } else {
-            error('Error al generar archivo de calendario')
+            toast.error('Error al generar archivo de calendario')
           }
         }
       } else if (format === 'print') {
-        info('Generando PDF...')
+        toast.loading('Generando PDF...')
         const materias = currentSchedule?.materias || []
+        toast.dismiss()
         if (materias.length === 0) {
-          error('No hay materias para exportar')
+          toast.error('No hay materias para exportar')
         } else {
           const result = await generateSchedulePDF(
             currentSchedule?.nombre || 'Mi Horario',
             materias
           )
           if (result) {
-            success('¡PDF descargado!')
+            toast.success('¡PDF descargado!')
           } else {
-            error('Error al generar PDF')
+            toast.error('Error al generar PDF')
           }
         }
       }
     } catch (err) {
-      error('Error al exportar')
+      toast.error('Error al exportar')
       console.error(err)
     }
     
     setIsExporting(false)
+  }
+
+  // Handle preview materia
+  const handlePreviewMateria = (materia: MateriaResult) => {
+    setPreviewMateria(materia)
+  }
+
+  // Handle add from preview
+  const handleAddFromPreview = (materia: MateriaResult) => {
+    handleAddMateria(materia)
+    setPreviewMateria(null)
+  }
+
+  // Clear all materias
+  const handleClearSchedule = async () => {
+    if (!currentSchedule?.materias?.length) return
+    
+    const confirmed = window.confirm('¿Estás seguro de que quieres limpiar todo el horario?')
+    if (!confirmed) return
+
+    for (const materia of currentSchedule.materias) {
+      await removeMateriaFromSchedule(materia.id, currentSchedule.id)
+    }
+    
+    setCurrentSchedule(prev => prev ? { ...prev, materias: [], total_creditos: 0 } : null)
+    setConflicts([])
+    toast.success('Horario limpiado')
   }
 
   // Callbacks para ScheduleManager
@@ -265,11 +311,21 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
 
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-400">Cargando tu horario...</p>
-        </div>
+      <div className="h-screen flex items-center justify-center bg-background">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            className="mx-auto mb-4"
+          >
+            <Loader2 className="size-12 text-primary" />
+          </motion.div>
+          <p className="text-muted-foreground">Cargando tu horario...</p>
+        </motion.div>
       </div>
     )
   }
@@ -277,7 +333,7 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
   const addedNRCs = (currentSchedule?.materias || []).map(m => m.nrc)
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-900">
+    <div className="h-screen flex flex-col overflow-hidden bg-background">
       <ScheduleHeader
         user={user}
         totalCreditos={currentSchedule?.total_creditos || 0}
@@ -287,6 +343,7 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
         onManageSchedules={() => setShowScheduleManager(true)}
         onOpenSearch={() => setShowMobileSidebar(true)}
         onOpenExport={() => setShowExportDrawer(true)}
+        onShowConflicts={() => setShowConflictDialog(true)}
         isExporting={isExporting}
         scheduleCount={allSchedules.length}
         isMobile={isMobile}
@@ -297,6 +354,7 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
         {!isMobile && (
           <ScheduleSidebar 
             onAddMateria={handleAddMateria}
+            onPreviewMateria={handlePreviewMateria}
             addedNRCs={addedNRCs}
           />
         )}
@@ -326,28 +384,85 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
         <ScheduleSidebar 
           onAddMateria={(materia) => {
             handleAddMateria(materia)
-            // No cerrar automáticamente para permitir agregar más
           }}
+          onPreviewMateria={handlePreviewMateria}
           addedNRCs={addedNRCs}
         />
       </MobileDrawer>
 
-      {/* FAB para abrir búsqueda en móvil */}
-      {isMobile && (
-        <button
-          onClick={() => setShowMobileSidebar(true)}
-          className="fixed bottom-6 right-6 w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/30 flex items-center justify-center z-40 active:scale-95 transition-transform"
-        >
-          <span className="material-symbols-outlined text-2xl">add</span>
-        </button>
-      )}
+      {/* Mobile Bottom Action Bar */}
+      <AnimatePresence>
+        {isMobile && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border p-3 z-40 safe-area-inset-bottom"
+          >
+            <div className="flex items-center justify-between gap-2 max-w-lg mx-auto">
+              {/* Stats */}
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="font-bold">
+                  {currentSchedule?.total_creditos || 0} cr
+                </Badge>
+                {conflicts.length > 0 && (
+                  <Badge 
+                    variant="destructive" 
+                    className="cursor-pointer"
+                    onClick={() => setShowConflictDialog(true)}
+                  >
+                    <AlertTriangle className="size-3 mr-1" />
+                    {conflicts.length}
+                  </Badge>
+                )}
+              </div>
 
-      {showConflictAlert && conflicts.length > 0 && (
-        <ConflictAlert 
-          conflicts={conflicts} 
-          onDismiss={() => setShowConflictAlert(false)}
-        />
-      )}
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowExportDrawer(true)}
+                >
+                  <Share2 className="size-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearSchedule}
+                  disabled={!currentSchedule?.materias?.length}
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => setShowMobileSidebar(true)}
+                  className="gap-1"
+                >
+                  <Plus className="size-4" />
+                  Agregar
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Preview Sheet */}
+      <ScheduleResultPreviewSheet
+        isOpen={!!previewMateria}
+        onClose={() => setPreviewMateria(null)}
+        materia={previewMateria}
+        onAdd={handleAddFromPreview}
+        isAdded={previewMateria ? addedNRCs.includes(previewMateria.nrc) : false}
+      />
+
+      {/* Conflict Dialog */}
+      <ConflictDialog
+        isOpen={showConflictDialog}
+        onClose={() => setShowConflictDialog(false)}
+        conflicts={conflicts}
+      />
 
       <ScheduleManager
         schedules={allSchedules}

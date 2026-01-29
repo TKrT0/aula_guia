@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { AlertTriangle, User, MapPin, Hash, CalendarCheck } from 'lucide-react';
 import type { HorarioMateria, ConflictInfo } from '@/src/lib/services/scheduleService';
 
 interface ScheduleGridMobileProps {
@@ -135,24 +137,46 @@ export default function ScheduleGridMobile({
 
       {/* Lista de clases */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <AnimatePresence mode="wait">
         {bloquesSorted.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-48 text-slate-400 dark:text-slate-500">
-            <span className="material-symbols-outlined text-5xl mb-2">event_available</span>
+          <motion.div 
+            key="empty"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="flex flex-col items-center justify-center h-48 text-slate-400 dark:text-slate-500"
+          >
+            <motion.div
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <CalendarCheck className="size-12 mb-2" />
+            </motion.div>
             <p className="text-sm font-medium">Sin clases este día</p>
-            <p className="text-xs">¡Disfruta tu tiempo libre! 🎉</p>
-          </div>
+            <p className="text-xs">¡Disfruta tu tiempo libre!</p>
+          </motion.div>
         ) : (
-          bloquesSorted.map((item, idx) => {
+          <motion.div
+            key="list"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="space-y-3"
+          >
+          {bloquesSorted.map((item, idx) => {
             const theme = getColor(item.materia.materia_nombre);
             
             return (
-              <div
-                key={`${item.materia.nrc}-${item.bloque.id}`}
-
+              <motion.div
+                key={`${item.materia.nrc}-${item.bloque.hora_inicio}-${idx}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.05 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => onMateriaClick?.(item.materia)}
                 className={`
                   relative overflow-hidden rounded-2xl p-4 cursor-pointer
-                  transition-all active:scale-[0.98]
+                  transition-shadow hover:shadow-lg
                   ${item.hasConflict ? 'ring-2 ring-red-500' : ''}
                 `}
                 style={{
@@ -162,10 +186,14 @@ export default function ScheduleGridMobile({
               >
                 {/* Indicador de conflicto */}
                 {item.hasConflict && (
-                  <div className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <span className="material-symbols-outlined text-xs">warning</span>
+                  <motion.div 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"
+                  >
+                    <AlertTriangle className="size-3" />
                     Conflicto
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Hora */}
@@ -193,26 +221,28 @@ export default function ScheduleGridMobile({
                 {/* Info adicional */}
                 <div className="flex flex-wrap gap-3 text-xs">
                   <div className="flex items-center gap-1" style={{ color: theme.text }}>
-                    <span className="material-symbols-outlined text-sm">person</span>
+                    <User className="size-3.5" />
                     <span>{item.materia.profesor_nombre?.split(' ').slice(0, 2).join(' ')}</span>
                   </div>
 
                   {item.bloque.salon && (
                     <div className="flex items-center gap-1" style={{ color: theme.text }}>
-                      <span className="material-symbols-outlined text-sm">location_on</span>
+                      <MapPin className="size-3.5" />
                       <span>{item.bloque.salon}</span>
                     </div>
                   )}
 
                   <div className="flex items-center gap-1 text-slate-500">
-                    <span className="material-symbols-outlined text-sm">tag</span>
+                    <Hash className="size-3.5" />
                     <span>{item.materia.nrc}</span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
-          })
+          })}
+          </motion.div>
         )}
+        </AnimatePresence>
       </div>
     </div>
   );

@@ -406,6 +406,9 @@ export async function detectAllConflicts(horarioId: string): Promise<ConflictInf
     })
   )
 
+  // Track conflicts to avoid duplicates
+  const seenConflicts = new Set<string>()
+
   // Comparar cada par de materias
   for (let i = 0; i < materiasConBloques.length; i++) {
     for (let j = i + 1; j < materiasConBloques.length; j++) {
@@ -421,6 +424,12 @@ export async function detectAllConflicts(horarioId: string): Promise<ConflictInf
               bloque2.hora_inicio,
               bloque2.hora_fin
             )) {
+              const conflictKey = `${materia1.id}-${materia2.id}-${bloque1.dia}-${bloque1.hora_inicio}-${bloque1.hora_fin}`
+              
+              // Skip if already added
+              if (seenConflicts.has(conflictKey)) continue
+              seenConflicts.add(conflictKey)
+
               conflicts.push({
                 materia1,
                 materia2,

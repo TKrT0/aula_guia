@@ -1,5 +1,8 @@
 'use client'
 
+import { motion } from 'framer-motion'
+import { AlertTriangle, X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import type { ConflictInfo } from '@/src/lib/services/scheduleService'
 
 interface ConflictAlertProps {
@@ -20,12 +23,21 @@ export default function ConflictAlert({ conflicts, onDismiss }: ConflictAlertPro
   if (conflicts.length === 0) return null
 
   return (
-    <div className="absolute bottom-6 left-6 right-6 md:left-auto md:right-6 md:max-w-md z-50">
-      <div className="bg-red-50 border border-red-200 rounded-xl shadow-lg p-4">
+    <motion.div 
+      initial={{ y: 50, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 50, opacity: 0 }}
+      className="absolute bottom-6 left-6 right-6 md:left-auto md:right-6 md:max-w-md z-50"
+    >
+      <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-xl shadow-lg p-4">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-red-600">warning</span>
-          </div>
+          <motion.div 
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 1, repeat: Infinity }}
+            className="w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-lg flex items-center justify-center shrink-0"
+          >
+            <AlertTriangle className="size-5 text-red-600" />
+          </motion.div>
           
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-red-800 text-sm mb-1">
@@ -56,15 +68,17 @@ export default function ConflictAlert({ conflicts, onDismiss }: ConflictAlertPro
           </div>
 
           {onDismiss && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onDismiss}
-              className="text-red-400 hover:text-red-600 transition-colors"
+              className="text-red-400 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50"
             >
-              <span className="material-symbols-outlined text-xl">close</span>
-            </button>
+              <X className="size-5" />
+            </Button>
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

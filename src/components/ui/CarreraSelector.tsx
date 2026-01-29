@@ -28,20 +28,20 @@ export default function CarreraSelector({ className = '', showLabel = true }: Ca
           value={carreraId || ''}
           onChange={(e) => setCarrera(e.target.value)}
           className={`
-            appearance-none w-full sm:w-auto
-            px-4 py-2.5 pr-10
-            bg-white border-2 rounded-xl
+            appearance-none w-full max-w-100
+            px-3 py-2 pr-8
+            bg-white dark:bg-[#0F1C2E] border-2 rounded-lg
             text-sm font-medium
             transition-all duration-200
-            focus:outline-none focus:ring-2 focus:ring-primary/20
+            focus:outline-none focus:ring-2 focus:ring-[#00BCD4]/20
             ${carreraId 
-              ? 'border-primary/30 text-slate-800' 
+              ? 'border-[#00BCD4]/30 text-slate-800 dark:text-white' 
               : 'border-amber-400 text-amber-700 bg-amber-50'
             }
           `}
         >
           <option value="" disabled>
-            ⚠️ Selecciona tu carrera
+          Selecciona tu carrera
           </option>
           {carreras.map((carrera) => (
             <option key={carrera.id} value={carrera.id}>
@@ -51,17 +51,17 @@ export default function CarreraSelector({ className = '', showLabel = true }: Ca
         </select>
         
         {/* Icono de dropdown */}
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-          <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+          <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </div>
       </div>
       
-      {/* Badge de carrera seleccionada */}
+      {/* Badge de carrera seleccionada - más pequeño */}
       {carreraId && (
-        <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold">
-          <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+        <span className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 bg-[#00BCD4]/10 dark:bg-cyan-500/20 text-[#00BCD4] dark:text-cyan-400 rounded-full text-[10px] font-bold">
+          <span className="w-1.5 h-1.5 bg-[#00BCD4] dark:bg-cyan-400 rounded-full animate-pulse" />
           {carreraId}
         </span>
       )}

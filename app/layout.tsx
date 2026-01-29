@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
-import { Lexend, Noto_Sans } from "next/font/google";
+import { Sora, Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 
-const lexend = Lexend({
+const sora = Sora({
   variable: "--font-display",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
-const noto = Noto_Sans({
+const inter = Inter({
   variable: "--font-body",
-  weight: ["300", "400", "500", "700"],
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -25,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={`${lexend.variable} ${noto.variable}`}>
+    <html lang="es" className={`${sora.variable} ${inter.variable}`}>
       <head>
         {/* Favicons */}
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
