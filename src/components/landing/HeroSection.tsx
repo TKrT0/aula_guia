@@ -111,7 +111,7 @@ export default function HeroSection() {
         >
           <div className="text-center">
             <p className="font-display text-2xl sm:text-3xl font-bold text-text dark:text-white">
-              2,500+
+              Todos los
             </p>
             <p className="font-body text-sm text-muted dark:text-slate-500">
               Profesores
@@ -119,10 +119,10 @@ export default function HeroSection() {
           </div>
           <div className="text-center">
             <p className="font-display text-2xl sm:text-3xl font-bold text-text dark:text-white">
-              15,000+
+              Todas
             </p>
             <p className="font-body text-sm text-muted dark:text-slate-500">
-              Estudiantes
+              las clases
             </p>
           </div>
           <div className="text-center">
