@@ -69,7 +69,7 @@ export default function Footer() {
         <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 
           text-center">
           <p className="font-body text-xs text-muted dark:text-slate-500">
-            © {new Date().getFullYear()} Aula Guía. Hecho con 💙 para estudiantes BUAP.
+            © {new Date().getFullYear()} Aula Guía. Hecho con 💙 por TKDev para estudiantes BUAP.
           </p>
         </div>
       </div>

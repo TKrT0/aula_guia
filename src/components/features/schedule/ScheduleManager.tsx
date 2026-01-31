@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Trash2, Plus, Loader2 } from 'lucide-react';
-import { Horario, createSchedule, deleteSchedule } from '@/src/lib/services/scheduleService';
-import { toast } from 'sonner';
+import { X, Calendar, Trash2, Plus, Loader2, Clock } from 'lucide-react';
+import { Horario, deleteSchedule } from '@/src/lib/services/scheduleService';
+import { useDeleteScheduleMutation } from '@/src/hooks/queries/useScheduleQuery';
+import { formatRelativeTime, formatSemester } from '@/src/lib/utils/dateUtils';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import CreateScheduleForm from './CreateScheduleForm';
 
 interface ScheduleManagerProps {
   schedules: Horario[];
@@ -29,46 +31,24 @@ export default function ScheduleManager({
   onClose,
 }: ScheduleManagerProps) {
   const [isCreating, setIsCreating] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [loading, setLoading] = useState(false);
+  const deleteMutation = useDeleteScheduleMutation();
 
   if (!isOpen) return null;
-
-  const handleCreate = async () => {
-    if (!newName.trim()) {
-      toast.error('Ingresa un nombre para el horario');
-      return;
-    }
-
-    setLoading(true);
-    const result = await createSchedule(newName.trim());
-    setLoading(false);
-
-    if (result.success && result.data) {
-      toast.success('Horario creado exitosamente');
-      onScheduleCreated(result.data);
-      setNewName('');
-      setIsCreating(false);
-    } else {
-      toast.error(result.error || 'Error al crear horario');
-    }
-  };
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`¿Eliminar el horario "${name}"? Esta acción no se puede deshacer.`)) {
       return;
     }
 
-    setLoading(true);
-    const result = await deleteSchedule(id);
-    setLoading(false);
-
+    const result = await deleteMutation.mutateAsync(id);
     if (result.success) {
-      toast.success('Horario eliminado');
       onScheduleDeleted(id);
-    } else {
-      toast.error(result.error || 'Error al eliminar horario');
     }
+  };
+
+  const handleScheduleCreated = (schedule: Horario) => {
+    onScheduleCreated(schedule);
+    setIsCreating(false);
   };
 
   return (
@@ -141,8 +121,17 @@ export default function ScheduleManager({
                       <div className={`w-3 h-3 rounded-full ${schedule.id === activeScheduleId ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
                       <div>
                         <p className="font-semibold text-sm">{schedule.nombre}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {schedule.total_creditos} créditos • {schedule.semestre || 'Sin semestre'}
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                            {schedule.total_creditos} cr
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {formatSemester(schedule.semestre || '')}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground/70 flex items-center gap-1 mt-1">
+                          <Clock className="size-3" />
+                          {formatRelativeTime(schedule.updated_at || schedule.created_at)}
                         </p>
                       </div>
                     </div>
@@ -155,7 +144,7 @@ export default function ScheduleManager({
                         handleDelete(schedule.id, schedule.nombre);
                       }}
                       className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                      disabled={loading}
+                      disabled={deleteMutation.isPending}
                     >
                       <Trash2 className="size-4" />
                     </Button>
@@ -175,34 +164,10 @@ export default function ScheduleManager({
               exit={{ opacity: 0, height: 0 }}
               className="mt-4 p-4 bg-muted/50 rounded-xl"
             >
-              <Input
-                type="text"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="Nombre del horario..."
-                autoFocus
-                onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+              <CreateScheduleForm
+                onSuccess={() => setIsCreating(false)}
+                onCancel={() => setIsCreating(false)}
               />
-              <div className="flex gap-2 mt-3">
-                <Button
-                  onClick={handleCreate}
-                  disabled={loading}
-                  className="flex-1"
-                >
-                  {loading ? (
-                    <><Loader2 className="size-4 animate-spin mr-2" /> Creando...</>
-                  ) : 'Crear'}
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setIsCreating(false);
-                    setNewName('');
-                  }}
-                >
-                  Cancelar
-                </Button>
-              </div>
             </motion.div>
           ) : (
             <motion.div

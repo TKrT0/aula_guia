@@ -92,21 +92,31 @@ export async function getScheduleWithMaterias(horarioId: string): Promise<Horari
     .select('*')
     .eq('horario_id', horarioId)
 
-  if (materiasError) {
+  if (materiasError || !materias || materias.length === 0) {
     return { ...horario, materias: [] }
   }
 
-  // Obtener bloques de horario para cada materia (usando nrc para distinguir profesores)
-  const materiasConBloques = await Promise.all(
-    (materias || []).map(async (materia: HorarioMateria) => {
-      const { data: bloques } = await supabase
-        .from('horarios_materia')
-        .select('*')
-        .eq('nrc', materia.nrc)
-      
-      return { ...materia, bloques: bloques || [] }
-    })
-  )
+  // OPTIMIZACIÓN: Obtener todos los bloques en una sola query usando IN
+  const nrcs = materias.map((m: HorarioMateria) => m.nrc)
+  const { data: allBloques } = await supabase
+    .from('horarios_materia')
+    .select('*')
+    .in('nrc', nrcs)
+
+  // Mapear bloques a cada materia
+  const bloquesMap = new Map<string, MateriaHorario[]>()
+  allBloques?.forEach((bloque: MateriaHorario) => {
+    const nrc = bloque.nrc || ''
+    if (!bloquesMap.has(nrc)) {
+      bloquesMap.set(nrc, [])
+    }
+    bloquesMap.get(nrc)!.push(bloque)
+  })
+
+  const materiasConBloques = materias.map((materia: HorarioMateria) => ({
+    ...materia,
+    bloques: bloquesMap.get(materia.nrc) || []
+  }))
 
   return { ...horario, materias: materiasConBloques }
 }
@@ -395,16 +405,27 @@ export async function detectAllConflicts(horarioId: string): Promise<ConflictInf
     return []
   }
 
-  // Obtener todos los bloques de todas las materias (usando nrc)
-  const materiasConBloques = await Promise.all(
-    materias.map(async (materia: HorarioMateria) => {
-      const { data: bloques } = await supabase
-        .from('horarios_materia')
-        .select('*')
-        .eq('nrc', materia.nrc)
-      return { ...materia, bloques: bloques || [] }
-    })
-  )
+  // OPTIMIZACIÓN: Obtener todos los bloques en una sola query
+  const nrcs = materias.map((m: HorarioMateria) => m.nrc)
+  const { data: allBloques } = await supabase
+    .from('horarios_materia')
+    .select('*')
+    .in('nrc', nrcs)
+
+  // Mapear bloques a cada materia
+  const bloquesMap = new Map<string, MateriaHorario[]>()
+  allBloques?.forEach((bloque: MateriaHorario) => {
+    const nrc = bloque.nrc || ''
+    if (!bloquesMap.has(nrc)) {
+      bloquesMap.set(nrc, [])
+    }
+    bloquesMap.get(nrc)!.push(bloque)
+  })
+
+  const materiasConBloques = materias.map((materia: HorarioMateria) => ({
+    ...materia,
+    bloques: bloquesMap.get(materia.nrc) || []
+  }))
 
   // Track conflicts to avoid duplicates
   const seenConflicts = new Set<string>()

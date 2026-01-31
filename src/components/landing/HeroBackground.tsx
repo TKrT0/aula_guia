@@ -17,7 +17,7 @@ export default function HeroBackground() {
             "#96CEB4", // Sage green
           ]}
           backgroundFill="#0A0F1A"  // Más oscuro para contraste
-          blur={6}  // Menos blur para más definición
+          blur={7}  // Menos blur para más definición
           speed="fast"  // Más rápido para movimiento visible
           waveOpacity={0.5}  // Más brillante y visible
           waveWidth={40}  // Más delgado para distinguir ondas

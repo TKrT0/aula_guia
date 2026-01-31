@@ -27,6 +27,7 @@ import {
   Loader2,
   GraduationCap
 } from 'lucide-react'
+import { TourButton } from '@/src/components/features/onboarding/TourButton'
 import { 
   getUserSchedules, 
   getScheduleWithMaterias, 
@@ -201,16 +202,15 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
     
     try {
       if (format === 'image') {
-        toast.loading('Generando imagen...')
+        const toastId = toast.loading('Generando imagen...')
         const result = await exportAsImage('schedule-grid', filename)
-        toast.dismiss()
         if (result) {
-          toast.success('¡Imagen descargada!')
+          toast.success('¡Imagen descargada!', { id: toastId })
         } else {
-          toast.error('Error al generar imagen')
+          toast.error('Error al generar imagen', { id: toastId })
         }
       } else if (format === 'calendar') {
-        toast.loading('Generando archivo de calendario...')
+        const toastId = toast.loading('Generando archivo de calendario...')
         // Recopilar todos los bloques de las materias
         const bloques = (currentSchedule?.materias || []).flatMap(materia => 
           (materia.bloques || []).map(bloque => ({
@@ -223,35 +223,34 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
             nrc: materia.nrc,
           }))
         )
-        toast.dismiss()
         
         if (bloques.length === 0) {
-          toast.error('No hay materias para exportar al calendario')
+          toast.error('No hay materias para exportar al calendario', { id: toastId })
         } else {
           const result = await exportToCalendar(bloques, currentSchedule?.nombre || 'Mi Horario')
           if (result) {
             toast.success('¡Archivo .ics descargado!', {
-              description: 'Ábrelo para importar a tu calendario'
+              description: 'Ábrelo para importar a tu calendario',
+              id: toastId
             })
           } else {
-            toast.error('Error al generar archivo de calendario')
+            toast.error('Error al generar archivo de calendario', { id: toastId })
           }
         }
       } else if (format === 'print') {
-        toast.loading('Generando PDF...')
+        const toastId = toast.loading('Generando PDF...')
         const materias = currentSchedule?.materias || []
-        toast.dismiss()
         if (materias.length === 0) {
-          toast.error('No hay materias para exportar')
+          toast.error('No hay materias para exportar', { id: toastId })
         } else {
           const result = await generateSchedulePDF(
             currentSchedule?.nombre || 'Mi Horario',
             materias
           )
           if (result) {
-            toast.success('¡PDF descargado!')
+            toast.success('¡PDF descargado!', { id: toastId })
           } else {
-            toast.error('Error al generar PDF')
+            toast.error('Error al generar PDF', { id: toastId })
           }
         }
       }
@@ -317,13 +316,9 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center"
         >
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-            className="mx-auto mb-4"
-          >
-            <Loader2 className="size-12 text-primary" />
-          </motion.div>
+          <div className="mx-auto mb-4 w-12 h-12">
+            <Loader2 className="size-12 text-primary animate-spin" />
+          </div>
           <p className="text-muted-foreground">Cargando tu horario...</p>
         </motion.div>
       </div>
@@ -352,27 +347,31 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar desktop */}
         {!isMobile && (
-          <ScheduleSidebar 
-            onAddMateria={handleAddMateria}
-            onPreviewMateria={handlePreviewMateria}
-            addedNRCs={addedNRCs}
-          />
+          <div data-tour="schedule-sidebar">
+            <ScheduleSidebar 
+              onAddMateria={handleAddMateria}
+              onPreviewMateria={handlePreviewMateria}
+              addedNRCs={addedNRCs}
+            />
+          </div>
         )}
         
         {/* Grid desktop o mobile */}
-        {isMobile ? (
-          <ScheduleGridMobile
-            materias={currentSchedule?.materias || []}
-            conflicts={conflicts}
-            onMateriaClick={handleRemoveMateria}
-          />
-        ) : (
-          <ScheduleGrid
-            materias={currentSchedule?.materias || []}
-            conflicts={conflicts}
-            onMateriaClick={handleRemoveMateria}
-          />
-        )}
+        <div data-tour="schedule-grid" className="flex-1">
+          {isMobile ? (
+            <ScheduleGridMobile
+              materias={currentSchedule?.materias || []}
+              conflicts={conflicts}
+              onMateriaClick={handleRemoveMateria}
+            />
+          ) : (
+            <ScheduleGrid
+              materias={currentSchedule?.materias || []}
+              conflicts={conflicts}
+              onMateriaClick={handleRemoveMateria}
+            />
+          )}
+        </div>
       </div>
 
       {/* Sidebar móvil como drawer */}
@@ -481,6 +480,13 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
         materias={currentSchedule?.materias || []}
         imageElementId="schedule-export-area"
       />
+
+      {/* Tour Button - Solo desktop */}
+      {!isMobile && (
+        <div className="fixed bottom-4 right-4 z-40">
+          <TourButton tourType="schedule" />
+        </div>
+      )}
     </div>
   )
 }

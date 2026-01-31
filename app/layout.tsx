@@ -16,8 +16,26 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Aula Guía | BUAP",
-  description: "Elige a tus profesores con datos reales.",
+  title: "Aula Guía | BUAP - Elige tus profesores con datos reales",
+  description: "Plataforma para estudiantes de la BUAP. Consulta horarios, calificaciones de profesores y arma tu horario ideal. Encuentra el mejor profesor para cada materia.",
+  keywords: ["BUAP", "profesores", "horarios", "materias", "FCC", "universidad", "calificaciones"],
+  authors: [{ name: "Aula Guía" }],
+  openGraph: {
+    title: "Aula Guía | BUAP",
+    description: "Elige tus profesores con datos reales. Consulta horarios y arma tu horario ideal.",
+    type: "website",
+    locale: "es_MX",
+    siteName: "Aula Guía",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Aula Guía | BUAP",
+    description: "Elige tus profesores con datos reales. Consulta horarios y arma tu horario ideal.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
@@ -33,8 +51,13 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/site.webmanifest" />
-        <meta name="theme-color" content="#2b8cee" />
+        
+        {/* PWA Manifest */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#003A5C" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Aula Guía" />
         
         {/* Material Icons */}
         <link 

@@ -1,0 +1,47 @@
+{
+  "name": "Aula Guía - BUAP",
+  "short_name": "Aula Guía",
+  "description": "Organiza tu horario universitario y encuentra a los mejores profesores de la BUAP",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B1220",
+  "theme_color": "#003A5C",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "lang": "es-MX",
+  "dir": "ltr",
+  "shortcuts": [
+    {
+      "name": "Mi Horario",
+      "short_name": "Horario",
+      "description": "Ver y editar tu horario",
+      "url": "/horario"
+    },
+    {
+      "name": "Buscar Profesores",
+      "short_name": "Buscar",
+      "description": "Buscar profesores y materias",
+      "url": "/buscar"
+    }
+  ]
+}

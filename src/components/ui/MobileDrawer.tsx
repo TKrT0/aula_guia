@@ -44,7 +44,13 @@ export default function MobileDrawer({ isOpen, onClose, title, children }: Mobil
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-2xl flex flex-col"
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.5 }}
+            onDragEnd={(_, info) => {
+              if (info.offset.y > 100) onClose()
+            }}
+            className="absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-2xl flex flex-col safe-area-inset-bottom"
             style={{ maxHeight: '85vh' }}
           >
             {/* Handle para drag */}

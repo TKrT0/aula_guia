@@ -53,7 +53,7 @@
   }
 }
 
-/* Tu Scrollbar Personalizado */
+/* Scrollbar Personalizado */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: #f1f1f1; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -187,8 +187,77 @@
   }
 }
 
-/* Tu Scrollbar Personalizado */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #f1f1f1; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+/* Fix para spinners - rotar sobre su propio centro */
+.animate-spin,
+svg.animate-spin {
+  transform-origin: center center;
+}
+
+/* Driver.js custom theme */
+.driver-popover {
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+.driver-popover-title {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+}
+
+.driver-popover-description {
+  font-size: 0.875rem !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.driver-popover-progress-text {
+  font-size: 0.75rem !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.driver-popover-prev-btn,
+.driver-popover-next-btn {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 500 !important;
+  transition: opacity 0.2s !important;
+}
+
+.driver-popover-prev-btn:hover,
+.driver-popover-next-btn:hover {
+  opacity: 0.9 !important;
+}
+
+.driver-popover-prev-btn {
+  background: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+.driver-popover-close-btn {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Safe area insets for mobile */
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.safe-area-inset-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* Mobile touch improvements */
+@media (max-width: 640px) {
+  button, a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+}

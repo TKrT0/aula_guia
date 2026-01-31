@@ -107,6 +107,7 @@ export default function ScheduleHeader({
               variant="secondary"
               onClick={onManageSchedules}
               className="hidden md:flex items-center gap-2 h-9"
+              data-tour="schedule-manager"
             >
               <Calendar className="size-4 text-primary" />
               <span className="max-w-[150px] truncate font-semibold">{scheduleName}</span>
@@ -129,6 +130,7 @@ export default function ScheduleHeader({
                 <motion.div 
                   whileHover={{ scale: 1.05 }}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50"
+                  data-tour="schedule-credits"
                 >
                   <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Carga</span>
                   <Badge variant="secondary" className="font-bold">
@@ -197,6 +199,7 @@ export default function ScheduleHeader({
               <Button 
                 className="hidden sm:flex gap-2"
                 disabled={isExporting}
+                data-tour="schedule-export"
               >
                 <AnimatePresence mode="wait">
                   {isExporting ? (

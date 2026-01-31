@@ -1,11 +1,12 @@
 'use client'
 
-import { useSearchParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { Suspense, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Filter, SlidersHorizontal, Grid3X3, List, Sparkles } from 'lucide-react'
+import { Search, SlidersHorizontal, Grid3X3, List, Sparkles, AlertCircle, RefreshCw } from 'lucide-react'
+import { useQueryState, parseAsString, parseAsStringLiteral } from 'nuqs'
 import Navbar from "@/src/components/layout/Navbar"
-import { buscarProfesoresYMaterias } from '@/src/lib/supabase/queries'
+import { useSearchQuery } from '@/src/hooks/queries/useSearchQuery'
+import type { SearchableItem } from '@/src/lib/search/fuzzySearch'
 import ProfessorCard from '@/src/components/features/search/ProfessorCard'
 import SearchBar from '@/src/components/features/search/SearchBar'
 import EmptyState from '@/src/components/ui/EmptyState'
@@ -14,6 +15,7 @@ import { useCarrera } from '@/src/contexts/CarreraContext'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { TourButton } from '@/src/components/features/onboarding/TourButton'
 
 function CardSkeleton() {
   return (
@@ -40,31 +42,35 @@ function CardSkeleton() {
   )
 }
 
-export default function BuscarPage() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const query = searchParams.get('q') || ''
-  const [resultados, setResultados] = useState<any[]>([])
-  const [cargando, setCargando] = useState(query ? true : false)
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+function BuscarContent() {
+  // Estado sincronizado con URL usando Nuqs
+  const [query, setQuery] = useQueryState('q', parseAsString.withDefault(''))
+  const [viewMode, setViewMode] = useQueryState(
+    'vista',
+    parseAsStringLiteral(['grid', 'list'] as const).withDefault('grid')
+  )
+  
   const { carreraId, carreraNombre } = useCarrera()
+  
+  // TanStack Query para búsqueda - maneja loading, cache, y errores automáticamente
+  const { 
+    data, 
+    isLoading: cargando, 
+    error: queryError,
+    refetch,
+    isFetching
+  } = useSearchQuery({ 
+    term: query, 
+    carreraId,
+    enabled: query.length >= 2
+  })
 
-  const handleSearch = (term: string) => {
-    router.push(`/buscar?q=${encodeURIComponent(term)}`)
-  }
+  const resultados: SearchableItem[] = data?.results || []
+  const usandoFuzzy = data?.source === 'fuzzy'
 
-  useEffect(() => {
-    async function obtenerDatos() {
-      setCargando(true)
-      const data = await buscarProfesoresYMaterias(query, carreraId)
-      setResultados(data)
-      setCargando(false)
-    }
-    
-    if (query) {
-      obtenerDatos()
-    }
-  }, [query, carreraId])
+  const handleSearch = useCallback((term: string) => {
+    setQuery(term)
+  }, [setQuery])
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1220]">
@@ -78,11 +84,13 @@ export default function BuscarPage() {
           transition={{ duration: 0.3 }}
           className="mb-8"
         >
-          <SearchBar 
-            onSearch={handleSearch} 
-            initialValue={query}
-            variant="compact"
-          />
+          <div data-tour="search-input">
+            <SearchBar 
+              onSearch={handleSearch} 
+              initialValue={query}
+              variant="compact"
+            />
+          </div>
         </motion.div>
 
         {/* Header Section */}
@@ -122,10 +130,12 @@ export default function BuscarPage() {
 
             {/* Controls */}
             <div className="flex items-center gap-3">
-              <CarreraSelector showLabel={false} />
+              <div data-tour="search-filters">
+                <CarreraSelector showLabel={false} />
+              </div>
               
               {/* View Toggle */}
-              <div className="hidden sm:flex items-center gap-1 p-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <div data-tour="search-view-toggle" className="hidden sm:flex items-center gap-1 p-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
                   size="sm"
@@ -158,10 +168,15 @@ export default function BuscarPage() {
                     Buscando coincidencias...
                   </span>
                 ) : (
-                  <>
+                  <span className="flex items-center gap-2">
                     <span className="font-semibold text-[#00BCD4]">{resultados.length}</span>
                     {' '}resultados encontrados
-                  </>
+                    {usandoFuzzy && (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 text-emerald-600 border-emerald-300 dark:text-emerald-400 dark:border-emerald-700">
+                        Búsqueda inteligente
+                      </Badge>
+                    )}
+                  </span>
                 )}
               </span>
             </div>
@@ -171,9 +186,37 @@ export default function BuscarPage() {
               Filtros
             </Button>
           </div>
+          
+          {/* Error de conexión */}
+          {queryError && (
+            <div className="mt-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 flex items-center gap-2">
+              <AlertCircle className="size-4 text-amber-600 dark:text-amber-400 shrink-0" />
+              <span className="text-sm text-amber-700 dark:text-amber-300">
+                Error al buscar. Intenta de nuevo.
+              </span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => refetch()}
+                className="ml-auto text-amber-700 dark:text-amber-300"
+              >
+                <RefreshCw className="size-4 mr-1" />
+                Reintentar
+              </Button>
+            </div>
+          )}
+          
+          {/* Indicador de refetch */}
+          {isFetching && !cargando && (
+            <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
+              <span className="size-3 border-2 border-[#00BCD4] border-t-transparent rounded-full animate-spin" />
+              Actualizando resultados...
+            </div>
+          )}
         </motion.div>
 
         {/* Results Grid */}
+        <div data-tour="search-results">
         <AnimatePresence mode="wait">
           {cargando ? (
             <motion.div
@@ -234,7 +277,39 @@ export default function BuscarPage() {
             </motion.div>
           )}
         </AnimatePresence>
+        </div>
+      </main>
+      
+      {/* Tour Button */}
+      <div className="fixed bottom-4 right-4 z-40">
+        <TourButton tourType="search" />
+      </div>
+    </div>
+  )
+}
+
+function BuscarFallback() {
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1220]">
+      <Navbar />
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mb-8">
+          <Skeleton className="h-14 w-full rounded-2xl" />
+        </div>
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(8)].map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
       </main>
     </div>
+  )
+}
+
+export default function BuscarPage() {
+  return (
+    <Suspense fallback={<BuscarFallback />}>
+      <BuscarContent />
+    </Suspense>
   )
 }
