@@ -27,7 +27,6 @@ import {
   Loader2,
   GraduationCap
 } from 'lucide-react'
-import { TourButton } from '@/src/components/features/onboarding/TourButton'
 import { 
   getUserSchedules, 
   getScheduleWithMaterias, 
@@ -347,31 +346,27 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar desktop */}
         {!isMobile && (
-          <div data-tour="schedule-sidebar">
-            <ScheduleSidebar 
-              onAddMateria={handleAddMateria}
-              onPreviewMateria={handlePreviewMateria}
-              addedNRCs={addedNRCs}
-            />
-          </div>
+          <ScheduleSidebar 
+            onAddMateria={handleAddMateria}
+            onPreviewMateria={handlePreviewMateria}
+            addedNRCs={addedNRCs}
+          />
         )}
         
         {/* Grid desktop o mobile */}
-        <div data-tour="schedule-grid" className="flex-1">
-          {isMobile ? (
-            <ScheduleGridMobile
-              materias={currentSchedule?.materias || []}
-              conflicts={conflicts}
-              onMateriaClick={handleRemoveMateria}
-            />
-          ) : (
-            <ScheduleGrid
-              materias={currentSchedule?.materias || []}
-              conflicts={conflicts}
-              onMateriaClick={handleRemoveMateria}
-            />
-          )}
-        </div>
+        {isMobile ? (
+          <ScheduleGridMobile
+            materias={currentSchedule?.materias || []}
+            conflicts={conflicts}
+            onMateriaClick={handleRemoveMateria}
+          />
+        ) : (
+          <ScheduleGrid
+            materias={currentSchedule?.materias || []}
+            conflicts={conflicts}
+            onMateriaClick={handleRemoveMateria}
+          />
+        )}
       </div>
 
       {/* Sidebar móvil como drawer */}
@@ -480,13 +475,6 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
         materias={currentSchedule?.materias || []}
         imageElementId="schedule-export-area"
       />
-
-      {/* Tour Button - Solo desktop */}
-      {!isMobile && (
-        <div className="fixed bottom-4 right-4 z-40">
-          <TourButton tourType="schedule" />
-        </div>
-      )}
     </div>
   )
 }

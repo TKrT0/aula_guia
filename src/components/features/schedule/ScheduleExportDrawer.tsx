@@ -128,12 +128,12 @@ export default function ScheduleExportDrawer({
     {
       id: 'ics' as const,
       title: 'Exportar Calendario',
-      description: 'Para Google/Apple Calendar',
+      description: 'Próximamente',
       icon: CalendarDays,
       iconColor: 'text-blue-500',
       bgColor: 'bg-blue-500/10',
       onClick: onExportICS,
-      disabled: false
+      disabled: true
     },
     {
       id: 'png' as const,

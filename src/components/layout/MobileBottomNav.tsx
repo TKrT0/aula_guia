@@ -14,8 +14,8 @@ const navItems = [
 export default function MobileBottomNav() {
   const pathname = usePathname()
 
-  // Don't show on horario page (has its own bottom bar)
-  if (pathname === '/horario') return null
+  // Don't show on landing page or horario page
+  if (pathname === '/' || pathname === '/horario') return null
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-background/95 backdrop-blur-lg border-t border-border safe-area-inset-bottom">
