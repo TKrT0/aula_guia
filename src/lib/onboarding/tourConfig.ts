@@ -31,7 +31,7 @@ const baseConfig: Partial<Config> = {
   animate: true,
   smoothScroll: true,
   allowClose: true,
-  overlayColor: 'rgba(150, 206, 180, 0.7)',
+  overlayColor: 'rgba(0, 0, 0, 0.7)',
   popoverClass: 'aula-guia-popover',
   nextBtnText: 'Siguiente',
   prevBtnText: 'Anterior',
