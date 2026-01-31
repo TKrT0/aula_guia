@@ -40,6 +40,7 @@ interface ScheduleSidebarProps {
   onAddMateria: (materia: MateriaResult) => void
   onPreviewMateria?: (materia: MateriaResult) => void
   addedNRCs: string[]
+  variant?: 'sidebar' | 'drawer'
 }
 
 const containerVariants = {
@@ -61,7 +62,8 @@ const itemVariants = {
   }
 }
 
-export default function ScheduleSidebar({ onAddMateria, onPreviewMateria, addedNRCs }: ScheduleSidebarProps) {
+export default function ScheduleSidebar({ onAddMateria, onPreviewMateria, addedNRCs, variant = 'sidebar' }: ScheduleSidebarProps) {
+  const isDrawer = variant === 'drawer'
   const [searchTerm, setSearchTerm] = useState('')
   const [results, setResults] = useState<MateriaResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -105,10 +107,13 @@ export default function ScheduleSidebar({ onAddMateria, onPreviewMateria, addedN
 
   return (
     <motion.aside 
-      initial={{ x: -20, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
+      initial={isDrawer ? { opacity: 0 } : { x: -20, opacity: 0 }}
+      animate={isDrawer ? { opacity: 1 } : { x: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="w-72 sm:w-80 md:w-96 flex flex-col border-r border-border bg-background z-10 shrink-0"
+      className={isDrawer 
+        ? "w-full flex flex-col bg-background" 
+        : "w-72 sm:w-80 md:w-96 flex flex-col border-r border-border bg-background z-10 shrink-0"
+      }
     >
       {/* Selector de Carrera */}
       <div className="p-4 border-b border-border bg-gradient-to-r from-primary/5 to-cyan-500/5">

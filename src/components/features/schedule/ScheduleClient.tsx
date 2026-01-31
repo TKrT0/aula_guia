@@ -381,6 +381,7 @@ export default function ScheduleClient({ user }: ScheduleClientProps) {
           }}
           onPreviewMateria={handlePreviewMateria}
           addedNRCs={addedNRCs}
+          variant="drawer"
         />
       </MobileDrawer>
 

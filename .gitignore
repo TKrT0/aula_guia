@@ -43,8 +43,7 @@ __pycache__/
 *.tsbuildinfo
 next-env.d.ts
 
-# python - backend
-backend/.venv/
-backend/data/
-backend/main.py
-backend/parser.py
+# python - backend (completo para Vercel)
+backend/
+
+
