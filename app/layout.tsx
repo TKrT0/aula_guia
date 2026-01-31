@@ -44,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={`${sora.variable} ${inter.variable}`}>
+    <html lang="es" className={`${sora.variable} ${inter.variable} dark`}>
       <head>
         {/* Favicons */}
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
